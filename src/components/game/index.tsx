@@ -67,7 +67,7 @@ function Actions() {
             Ver etiqueta principal
           </label>
         )}
-        {length >= 0 && description && (
+        {length >= 10 && description && (
           <button
             className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center"
             onClick={() => {
