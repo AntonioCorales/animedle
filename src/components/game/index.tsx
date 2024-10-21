@@ -70,12 +70,12 @@ function Actions() {
         >
           <RestartAlt />
         </button>
-        {/* <button
+        <button
           onClick={() => setState("win")}
           className="bg-green-500 p-2 rounded-md"
         >
           win
-        </button> */}
+        </button>
       </div>
     </div>
   );
@@ -102,6 +102,6 @@ function WinComponent() {
 
 
   return (
-    <>{state === "win" && <ConfettiExplosion style={{ zIndex: 1000, maxWidth: "100vw", height: "100vh" }} />}</>
+    <>{state === "win" && <ConfettiExplosion style={{ zIndex: 1000, width: "90vw", height: "100vh", marginInline:"auto" }} />}</>
   );
 }
