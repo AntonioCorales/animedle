@@ -70,12 +70,12 @@ function Actions() {
         >
           <RestartAlt />
         </button>
-        <button
+        {/* <button
           onClick={() => setState("win")}
           className="bg-green-500 p-2 rounded-md"
         >
           win
-        </button>
+        </button> */}
       </div>
     </div>
   );
