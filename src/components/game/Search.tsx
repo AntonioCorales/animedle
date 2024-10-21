@@ -7,12 +7,13 @@ import Image from "next/image";
 import { CloseOutlined } from "@mui/icons-material";
 
 export default function Search() {
-  const { animes, addAnime, state, anime, setState } = useGameContext();
+  const { animes, addAnime, state, anime, setState, showMainGenre, showMainTag, showYears } = useGameContext();
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const filteredAnimes = useFilteredAnimes(animes, search);
+  
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -71,7 +72,7 @@ export default function Search() {
       {isOpen && search && state === "play" && (
         <div
           id="options-search"
-          className="text-white bg-slate-900 z-[1000] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
+          className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
         >
           {filteredAnimes?.map((filteredAnime) => (
             <div
@@ -82,6 +83,10 @@ export default function Search() {
                   addAnime(filteredAnime);
                   setSearch("");
                   setIsOpen(false);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  })
                 }
                 if(filteredAnime.id === anime?.id){
                   setState("win");
@@ -104,6 +109,11 @@ export default function Search() {
                 <span className="text-sm text-slate-400 leading-4">
                   {filteredAnime.englishName}
                 </span>
+                <div className="text-xs text-sky-400 leading-4 flex flex-col gap-1">
+                  {showMainGenre && <span>{filteredAnime.genres[0]}</span>}
+                  {showMainTag && <span>{filteredAnime.tags[0]}</span>}
+                  {showYears && <span>{filteredAnime.seasonYear}</span>}
+                </div>
               </div>
             </div>
           ))}

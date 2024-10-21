@@ -15,32 +15,30 @@ export default function Table() {
   const { selectedAnimes } = useGameContext();
 
   return (
-    <div className="max-w-screen-sm sm:max-w-screen-lg overflow-auto">
+    <div className="max-w-screen-sm sm:max-w-screen-lg overflow-auto pb-4">
       <table className="table-auto w-full border-separate border-spacing-2 border-spacing-y-4 ">
         <thead>
           <tr className="border-b-2 border-slate-800">
-            <th className="text-left min-w-[150px]">Nombre</th>
-            <th className="text-left">Géneros</th>
-            <th className="text-left">Etiquetas</th>
-            <th className="text-left">Capítulos</th>
-            <th className="text-left">Año</th>
-            <th className="text-left">Temporada</th>
-            <th className="text-left">Formato</th>
+            <th className="text-center min-w-[150px]">Nombre</th>
+            <th className="text-center">Géneros</th>
+            <th className="text-center">Etiquetas</th>
+            <th className="text-center">Capítulos</th>
+            <th className="text-center">Año</th>
+            <th className="text-center">Temporada</th>
+            <th className="text-center">Formato</th>
           </tr>
         </thead>
         <tbody>
           {selectedAnimes.map((anime) => (
             <TableItem key={anime.id} anime={anime} />
           ))}
-          {selectedAnimes.length === 0 && (
-            <tr>
-              <td colSpan={7} className="text-center text-sky-500">
-                No hay anime seleccionados
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
+      {selectedAnimes.length === 0 && (
+        <div className="text-center text-sky-500 w-full">
+          No hay anime seleccionados
+        </div>
+      )}
     </div>
   );
 }
@@ -55,7 +53,7 @@ function TableItem(
 
   return (
     <tr {...rest}>
-      <td className="text-left w-[100px]">
+      <td className="text-left w-[140px] flex justify-center ">
         <div className="gap-2 font-bold text-center w-fit text-xs flex flex-col">
           <Image
             src={anime.image}

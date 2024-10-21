@@ -33,6 +33,23 @@ export default function RootLayout({
         <QueryProvider>
           <ApolloWrapper>{children}</ApolloWrapper>
         </QueryProvider>
+        <footer className="w-full flex flex-row justify-center items-center gap-2 text-xs text-slate-400 text-center bg-gray-900">
+          <div className="m-auto w-full  max-w-lg flex flex-col lg:flex-row lg:justify-between lg:max-w-2xl">
+            <span>Desarrollado por: Kkuuhaku</span>
+            <span>Versión: 1.0.0</span>
+            <span>
+              Contiene datos de:{" "}
+              <a
+                href="https://anilist.co/"
+                className="hover:text-sky-500"
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                AniList API
+              </a>
+            </span>
+          </div>
+        </footer>
       </body>
     </html>
   );
