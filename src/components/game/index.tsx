@@ -4,6 +4,8 @@ import { GameProvider, useGameContext } from "./context";
 import Search from "./Search";
 import Table from "./Table";
 import { RestartAlt } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Game() {
   return (
@@ -24,19 +26,20 @@ export default function Game() {
 
 function Actions() {
   const {
+    anime,
     resetGame,
-    setState,
     selectedAnimes,
     setShowYears,
     setShowMainGenre,
     setShowMainTag,
   } = useGameContext();
   const { length } = selectedAnimes;
+  const description = formatDescription(anime?.description)
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col lg:flex-row lg:gap-4  lg:items-center">
         {length >= 4 && (
-          <label className="flex gap-2">
+          <label className="flex gap-2 ">
             <input
               type="checkbox"
               onChange={(e) => setShowYears(e.target.checked)}
@@ -47,6 +50,7 @@ function Actions() {
         {length >= 6 && (
           <label className="flex gap-2">
             <input
+              className="outline-none"
               type="checkbox"
               onChange={(e) => setShowMainGenre(e.target.checked)}
             />
@@ -56,11 +60,28 @@ function Actions() {
         {length >= 8 && (
           <label className="flex gap-2">
             <input
+              className="outline-none"
               type="checkbox"
               onChange={(e) => setShowMainTag(e.target.checked)}
             />
             Ver etiqueta principal
           </label>
+        )}
+        {length >= 0 && description && (
+          <button
+            className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center"
+            onClick={() => {
+              Swal.fire({
+                titleText: "Descripción del anime",
+                html: `<p>${description}</p>`,
+                background: "#0f172a",
+                color: "white",
+                confirmButtonText: "Cerrar",
+              });
+            }}
+          >
+            Mostrar descripción
+          </button>
         )}
       </div>
       <div className="flex gap-2 justify-center items-start">
@@ -98,10 +119,41 @@ function Status() {
 }
 
 function WinComponent() {
-  const { state } = useGameContext();
+  const { state, selectedAnimes } = useGameContext();
 
+  const [height, setHeight] = useState(0);
+
+  const updateWindowSize = () => {
+    const totalHeight = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight
+    );
+    setHeight(totalHeight);
+  };
+
+  useEffect(() => {
+    updateWindowSize();
+  }, [selectedAnimes]);
 
   return (
-    <>{state === "win" && <ConfettiExplosion style={{ zIndex: 1000, width: "90vw", height: "100vh", marginInline:"auto" }} />}</>
+    <>
+      {state === "win" && (
+        <ConfettiExplosion
+          style={{
+            zIndex: 1000,
+            width: "90vw",
+            height: height + "px",
+            marginInline: "auto",
+          }}
+        />
+      )}
+    </>
   );
+}
+
+function formatDescription(description?: string | null) {
+  if(!description) return;
+
+  /* */
+  return description.replace(/\b[A-Z][a-zA-Z]*\b/g, match => '*'.repeat(match.length))
 }

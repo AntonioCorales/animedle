@@ -13,6 +13,7 @@ export type SearchAnime = {
   seasonYear: number;
   season: string;
   format: string;
+  description?: string | null;
 };
 
 type GameState = "play" | "win";
@@ -94,6 +95,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
             seasonYear: media.seasonYear,
             format: media.format,
             season: media.season,
+            description: media.description,
           };
         });
         setAnimes(

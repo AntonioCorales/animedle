@@ -69,7 +69,7 @@ export default function Search() {
           <CloseOutlined />
         </button>
       </div>
-      {isOpen && search && state === "play" && (
+      {search && state === "play" && (
         <div
           id="options-search"
           className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
@@ -90,6 +90,13 @@ export default function Search() {
                 }
                 if(filteredAnime.id === anime?.id){
                   setState("win");
+                  return;
+                }
+                if(ref.current){
+                  const inputElement = ref.current?.querySelector(
+                    "input"
+                  ) as HTMLInputElement;
+                  inputElement?.focus();
                 }
               }}
             >
