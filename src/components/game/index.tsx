@@ -10,9 +10,9 @@ import Swal from "sweetalert2";
 export default function Game() {
   return (
     <GameProvider>
-      <header className="flex flex-col gap-8 sticky top-0 pt-6 bg-[#0a0a0a] z-[999]">
-        <h1 className="text-4xl font-bold text-center">AnimeDle</h1>
-        <div className="flex flex-col gap-4">
+      <h1 className="text-4xl font-bold text-center">AnimeDle</h1>
+      <header className="flex flex-col gap-8 sticky top-0 pt-4 bg-[#0a0a0a] z-[999]">
+        <div className="flex flex-col gap-4 pb-4">
           <Search />
           <Actions />
           <Status />
@@ -34,7 +34,7 @@ function Actions() {
     setShowMainTag,
   } = useGameContext();
   const { length } = selectedAnimes;
-  const description = formatDescription(anime?.description)
+  const description = formatDescription(anime?.description);
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col lg:flex-row lg:gap-4  lg:items-center">
@@ -152,8 +152,10 @@ function WinComponent() {
 }
 
 function formatDescription(description?: string | null) {
-  if(!description) return;
+  if (!description) return;
 
   /* */
-  return description.replace(/\b[A-Z][a-zA-Z]*\b/g, match => '*'.repeat(match.length))
+  return description.replace(/\b[A-Z][a-zA-Z]*\b/g, (match) =>
+    "*".repeat(match.length)
+  );
 }

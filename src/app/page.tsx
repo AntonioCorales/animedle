@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 export default function Home() {
   return (
-    <div className="max-w-screen-lg min-h-screen px-4 m-auto py-5 flex flex-col gap-4">
+    <div className="max-w-screen-lg min-h-screen px-4 m-auto py-5 flex flex-col">
       <Suspense fallback={<GameServer />}>
         <Game />
       </Suspense>
