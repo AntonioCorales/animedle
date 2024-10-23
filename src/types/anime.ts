@@ -41,6 +41,7 @@ export type Media = {
   seasonYear: number;
   season: string;
   format: string;
+  synonyms: string[];
 };
 
 export type CoverImage = {

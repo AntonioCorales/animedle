@@ -76,18 +76,17 @@ export function GameProvider({ children }: React.PropsWithChildren) {
       if (listCompletedAnimes) {
         const completedAnimes = listCompletedAnimes.entries.map((entry) => {
           const { media } = entry;
-          const altNames = [media.title.romaji.toLowerCase()];
+          const altNames = [media.title.romaji.toLowerCase(), ...media.synonyms.map(s=>s.toLowerCase())];
 
           if (media.title.english) {
             altNames.push(media.title.english.toLowerCase());
-            altNames.push(media.title.english);
           }
 
           return {
             id: media.idMal.toString(),
             name: media.title.romaji,
             englishName: media.title.english,
-            altNames,
+            altNames: altNames,
             image: media.coverImage.large,
             genres: media.genres,
             tags: media.tags.map((tag) => tag.name).slice(0, 3),
