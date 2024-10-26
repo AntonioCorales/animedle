@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import InputSearch from "../server-views/InputSearch";
 import { SearchAnime, useGameContext } from "./context";
 import Image from "next/image";
@@ -17,9 +17,11 @@ export default function Search(props: SearchProps) {
 
   const filteredAnimes = useFilteredAnimes(animes, search);
 
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleSelect = (anime: SearchAnime) => {
+  const handleSelect = useCallback((anime: SearchAnime) => {
     onSelect?.(anime);
     setSearch("");
     setIsOpen(false);
@@ -29,7 +31,7 @@ export default function Search(props: SearchProps) {
       ) as HTMLInputElement;
       inputElement?.focus();
     }
-  };
+  },[onSelect]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,6 +51,23 @@ export default function Search(props: SearchProps) {
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowDown") {
+        setSelectedIndex((prevIndex) => (prevIndex + 1) % filteredAnimes.length);
+      }
+      if (event.key === "ArrowUp") {
+        setSelectedIndex((prevIndex) =>
+          (prevIndex + filteredAnimes.length - 1) % filteredAnimes.length
+        );
+      }
+    };
+
+    const handleEnter = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        handleSelect(filteredAnimes[selectedIndex]);
+      }
+    };
+
     const divElement = ref.current;
 
     divElement?.addEventListener("click", handleClickInside);
@@ -56,12 +75,33 @@ export default function Search(props: SearchProps) {
     divElement?.addEventListener("focusIn", () => {
       setIsOpen(true);
     });
+    divElement?.addEventListener("keydown", handleKeyDown);
+    divElement?.addEventListener("keydown", handleEnter);
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
       divElement?.removeEventListener("click", handleClickInside);
+      divElement?.removeEventListener("keydown", handleKeyDown);
+      divElement?.removeEventListener("keydown", handleEnter);
     };
-  }, [ref]);
+  }, [ref, filteredAnimes, handleSelect, selectedIndex]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [search]);
+
+  useEffect(() => {
+    const optionsElement = document.getElementById("options-search");
+    if (optionsElement) {
+      const selectedOption = optionsElement.querySelector(".selected");
+      if (selectedOption) {
+        selectedOption.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   return (
     <div className="flex flex-col gap-2 relative">
@@ -89,10 +129,10 @@ export default function Search(props: SearchProps) {
           id="options-search"
           className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
         >
-          {filteredAnimes?.map((filteredAnime) => (
+          {filteredAnimes?.map((filteredAnime, index) => (
             <div
               key={filteredAnime.id}
-              className="flex flex-row gap-3 p-2 hover:bg-slate-800 cursor-pointer"
+              className={`flex flex-row gap-3 p-2 hover:bg-slate-800 cursor-pointer ${selectedIndex === index ? "bg-slate-700 selected hover:bg-slate-700" : ""}`}
               onClick={() => {
                 handleSelect(filteredAnime);
               }}

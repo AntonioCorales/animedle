@@ -17,7 +17,8 @@ export default function CharaAnimeGame() {
       {status === "init" && <Init />}
       {(status === "stale" ||
         status === "playing" ||
-        status === "win-round" || status === "error-round") && <Playing />}
+        status === "win-round" ||
+        status === "error-round") && <Playing />}
       {status === "end" && <End />}
     </div>
   );
@@ -76,7 +77,7 @@ function Round() {
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
         {characters.map((character, index) => (
           <CardCharacter
-            key={index}
+            key={index + character.character.malID}
             characterData={character}
             onClick={() => {
               if (currentPosition === index) setCurrentPosition(index + 1);
@@ -124,17 +125,15 @@ function Controls() {
       {status === "win-round" && (
         <span className="text-green-300 text-xl">¡Correcto! </span>
       )}
-      {
-        status === "error-round" && (
-          <span className="text-red-500 text-xl">¡Incorrecto! </span>
-        )
-      }
+      {status === "error-round" && (
+        <span className="text-red-500 text-xl">¡Incorrecto! </span>
+      )}
 
       <button
         onClick={nextRound}
         disabled={status !== "win-round"}
-        className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
-      >
+        className=" bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+      >        
         Siguiente ronda
       </button>
     </div>

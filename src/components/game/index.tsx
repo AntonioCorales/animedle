@@ -26,7 +26,10 @@ export default function AnimeDleGame() {
                 });
               }
               if (anime?.id === selectedAnime.id) {
-                setState("win");
+                //delay 300 * 5 ms
+                setTimeout(() => {
+                  setState("win");
+                }, 300 * 5);
                 return;
               }
             }}
