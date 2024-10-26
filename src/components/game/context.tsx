@@ -69,8 +69,6 @@ export function GameProvider({ children }: React.PropsWithChildren) {
   const [showMainGenre, setShowMainGenre] = useState<boolean>(false);
   const [showMainTag, setShowMainTag] = useState<boolean>(false);
   const [counter, setCounter] = useState<number>(0);
-  // console.log({anime})
-
 
   const addAnime = (anime: SearchAnime) => {
     if (!selectedAnimesIds.includes(anime.id)) {
@@ -83,7 +81,6 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     setState("play");
     setSelectedAnimes([]);
     setSelectedAnimesIds([]);
-    setAnime(getRandomByArray(animes));
     setShowMainGenre(false);
     setShowMainTag(false);
     setShowYears(false);
@@ -98,6 +95,8 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     }, 1000);
     return () => clearTimeout(timeout);
   }, [counter, state]);
+
+ 
 
   return (
     <GameContext.Provider
