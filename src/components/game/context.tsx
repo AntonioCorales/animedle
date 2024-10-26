@@ -69,53 +69,8 @@ export function GameProvider({ children }: React.PropsWithChildren) {
   const [showMainGenre, setShowMainGenre] = useState<boolean>(false);
   const [showMainTag, setShowMainTag] = useState<boolean>(false);
   const [counter, setCounter] = useState<number>(0);
-
   // console.log({anime})
 
-  useEffect(() => {
-    if (data) {
-      const listCompletedAnimes = data.lists.find(
-        (list) => list.name === "Completed"
-      );
-
-      if (listCompletedAnimes) {
-        const completedAnimes = listCompletedAnimes.entries.map((entry) => {
-          const { media } = entry;
-          const altNames = [media.title.romaji.toLowerCase(), ...media.synonyms.map(s=>s.toLowerCase())];
-
-          if (media.title.english) {
-            altNames.push(media.title.english.toLowerCase());
-          }
-
-          return {
-            id: media.idMal.toString(),
-            name: media.title.romaji,
-            englishName: media.title.english,
-            altNames: altNames,
-            image: media.coverImage.large,
-            genres: media.genres,
-            tags: media.tags.map((tag) => tag.name).slice(0, 3),
-            episodes: media.episodes,
-            seasonYear: media.seasonYear,
-            format: media.format,
-            season: media.season,
-            description: media.description,
-          };
-        });
-        setAnimes(
-          completedAnimes.toSorted((a, b) => {
-            if (a.seasonYear === b.seasonYear) {
-              return a.name.localeCompare(b.name);
-            }
-            return a.seasonYear - b.seasonYear;
-          })
-        );
-        setAnime(
-          completedAnimes[Math.floor(Math.random() * completedAnimes.length)]
-        );
-      }
-    }
-  }, [data]);
 
   const addAnime = (anime: SearchAnime) => {
     if (!selectedAnimesIds.includes(anime.id)) {
