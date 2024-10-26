@@ -16,8 +16,10 @@ export type ResponseAnimeByUser = {
   MediaListCollection: MediaListCollection;
 };
 
+export type ListName = "Completed" | "Watching" | "Dropped" | "Paused";
+
 export type List = {
-  name: "Completed" | "Watching" | "Dropped" | "Paused";
+  name: ListName;
   entries: Entry[];
 };
 
@@ -37,7 +39,7 @@ export type Media = {
   hashtag: null | string;
   description: null | string;
   episodes: number;
-  tags: {name: string}[];
+  tags: { name: string }[];
   seasonYear: number;
   season: string;
   format: string;
@@ -75,3 +77,38 @@ export type Title = {
   romaji: string;
   english: null | string;
 };
+
+export type Gender = "Female" | "Male";
+
+export type Image = {
+  large: string;
+  medium: string;
+};
+
+export type Name = {
+  full:        string;
+  alternative: string[];
+}
+
+export type Character = {
+  id: number;
+  age: null | string;
+  gender: Gender;
+  description: null | string;
+  favourites: number;
+  name: Name;
+  image: Image;
+  media: MediaClass;
+};
+
+export type MediaClass = {
+  nodes: MediaNode[];
+}
+
+export type MediaNode = {
+  id: number;
+  idMal: number;
+  format: Format;
+  title:  Title;
+}
+export type Format = "NOVEL" | "TV" | "MANGA" | "ONE_SHOT";
