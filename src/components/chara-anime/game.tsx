@@ -144,12 +144,14 @@ function End() {
     (prev, curr) => prev + curr.selectedAnimes.length,
     0
   );
+  const maxPoints = totalRounds * 40;
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center pb-64 flex-1">
       <span className="text-green-300 text-2xl">¡Felicidades!</span>
-      <span>Has obtenido {totalPoints} puntos</span>
-      <span>Has intentado {totalTries} veces </span>
+      { maxPoints === totalPoints && totalTries === totalRounds && <span className="text-xl text-sky-400">¡Puntuación perfecta!</span>}
+      <span>Has obtenido {totalPoints} de {maxPoints} puntos</span>
+      <span>Has intentado {totalTries} veces en {totalRounds} rondas </span>
       <button
         className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
         onClick={initGame}
