@@ -15,7 +15,8 @@ type CharaAnimeStatus =
   | "playing"
   | "win"
   | "end"
-  | "win-round";
+  | "win-round"
+  | "error-round";
 
 type RoundData = {
   animes: MinAnimeData[];
@@ -98,11 +99,11 @@ export function CharaAnimeProvider({
   const { characters, isLoading, redo, animes } =
     useGetCharactersToCharaAnime(animesAlreadyShowed);
 
-  const initRound = () => {
+  const initRound = () => {    
+    redo();
     setCurrentPosition(0);
     setSelectedAnimes([]);
     setStatus("stale");
-    redo();
   };
 
   const initGame = () => {
@@ -111,7 +112,6 @@ export function CharaAnimeProvider({
     setCurrentPosition(0);
     setSelectedAnimes([]);
     setTotalPoints(0);
-    redo();
     setStatus("init");
   };
 
@@ -121,7 +121,6 @@ export function CharaAnimeProvider({
 
   const addAnime = (anime: MinAnimeData) => {
     const newSelectedAnimes = [anime, ...selectedAnimes];
-    console.log({ newSelectedAnimes });
     setSelectedAnimes((prev) => [anime, ...prev]);
     if (
       animes.some(
@@ -148,6 +147,7 @@ export function CharaAnimeProvider({
       setStatus("win-round");
       return true;
     }
+    setStatus("error-round")
     return false;
   };
 

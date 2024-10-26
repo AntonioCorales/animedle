@@ -1,7 +1,6 @@
 import { TitleStyles } from "../common";
 import { useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
-import Head from "next/head";
 import FlipCard from "./FlipCard";
 import { useState } from "react";
 import Image from "next/image";
@@ -9,23 +8,16 @@ import Search from "../game/Search";
 import { WinComponent } from "./WinComponent";
 
 export default function CharaAnimeGame() {
-  const { status, initGame } = useCharaAnimeContext();
+  const { status } = useCharaAnimeContext();
   return (
     <div className="flex flex-col gap-2 flex-1">
       <TitleStyles>CharaAnime</TitleStyles>
       <h2 className="text-center">Adivina el anime por sus personajes</h2>
-      {/* <button
-        onClick={() => {
-          initGame();
-        }}
-      >
-        Start
-      </button> */}
       <WinComponent />
       {status === "init" && <Init />}
       {(status === "stale" ||
         status === "playing" ||
-        status === "win-round") && <Playing />}
+        status === "win-round" || status === "error-round") && <Playing />}
       {status === "end" && <End />}
     </div>
   );
@@ -62,10 +54,13 @@ function Init() {
 }
 
 function Playing() {
-  const { isLoading, addAnime, initGame, status } = useCharaAnimeContext();
+  const { isLoading, addAnime, status } = useCharaAnimeContext();
   return (
     <div className="flex flex-col gap-4">
-      <Search onSelect={addAnime} disabled={isLoading || status === "win-round"} />
+      <Search
+        onSelect={addAnime}
+        disabled={isLoading || status === "win-round"}
+      />
       <Stats />
       <Round />
       <Controls />
@@ -78,7 +73,7 @@ function Round() {
     useCharaAnimeContext();
   return (
     <div className="flex flex-col gap-4 items-center">
-      <div className="characters grid grid-cols-2 lg:grid-cols-4  gap-8 items-center justify-center mx-auto">
+      <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
         {characters.map((character, index) => (
           <CardCharacter
             key={index}
@@ -119,14 +114,22 @@ function Controls() {
 
   return (
     <div className="flex gap-2 justify-between items-center">
-      <button className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
+      <button
+        className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
         onClick={initGame}
       >
         Reiniciar
       </button>
-      <span className="text-green-300 text-xl">
-        {status === "win-round" && "¡Correcto!"}
-      </span>
+
+      {status === "win-round" && (
+        <span className="text-green-300 text-xl">¡Correcto! </span>
+      )}
+      {
+        status === "error-round" && (
+          <span className="text-red-500 text-xl">¡Incorrecto! </span>
+        )
+      }
+
       <button
         onClick={nextRound}
         disabled={status !== "win-round"}
@@ -149,9 +152,15 @@ function End() {
   return (
     <div className="flex flex-col gap-2 justify-center items-center pb-64 flex-1">
       <span className="text-green-300 text-2xl">¡Felicidades!</span>
-      { maxPoints === totalPoints && totalTries === totalRounds && <span className="text-xl text-sky-400">¡Puntuación perfecta!</span>}
-      <span>Has obtenido {totalPoints} de {maxPoints} puntos</span>
-      <span>Has intentado {totalTries} veces en {totalRounds} rondas </span>
+      {maxPoints === totalPoints && totalTries === totalRounds && (
+        <span className="text-xl text-sky-400">¡Puntuación perfecta!</span>
+      )}
+      <span>
+        Has obtenido {totalPoints} de {maxPoints} puntos
+      </span>
+      <span>
+        Has intentado {totalTries} veces en {totalRounds} rondas{" "}
+      </span>
       <button
         className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
         onClick={initGame}
