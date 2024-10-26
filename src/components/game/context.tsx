@@ -1,8 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
+import { formatAnimes, useGetAndFormatAnimes } from "../utils/useGetAnime";
+import { getRandomByArray } from "../utils/functions";
 
 export type SearchAnime = {
-  id: string;
+  id: number;
+  idMal: number;
   name: string;
   englishName?: string | null;
   altNames: string[];
@@ -19,10 +22,10 @@ export type SearchAnime = {
 type GameState = "play" | "win";
 
 type GameContextType = {
-  animes?: SearchAnime[];
-  anime?: SearchAnime;
+  animes?: SearchAnime[] ;
+  anime?: SearchAnime | null;
   selectedAnimes: SearchAnime[];
-  selectedAnimesIds: string[];
+  selectedAnimesIds: number[];
   addAnime: (anime: SearchAnime) => void;
   resetGame: () => void;
   state: GameState;
@@ -54,64 +57,20 @@ const GameContext = createContext<GameContextType>({
 });
 
 export function GameProvider({ children }: React.PropsWithChildren) {
-  const { data } = useGetAnimeByUser("DoubleCReacts");
-  const [animes, setAnimes] = useState<SearchAnime[]>([]);
-  const [anime, setAnime] = useState<SearchAnime>();
+  const { animes, isLoading } = useGetAndFormatAnimes("DoubleCReacts", {
+    tagsLimit: 5,
+    types: ["Completed"],
+  });
+  const [anime, setAnime] = useState<SearchAnime | null>(getRandomByArray(animes));
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
-  const [selectedAnimesIds, setSelectedAnimesIds] = useState<string[]>([]);
+  const [selectedAnimesIds, setSelectedAnimesIds] = useState<number[]>([]);
   const [state, setState] = useState<GameState>("play");
   const [showYears, setShowYears] = useState<boolean>(false);
   const [showMainGenre, setShowMainGenre] = useState<boolean>(false);
   const [showMainTag, setShowMainTag] = useState<boolean>(false);
   const [counter, setCounter] = useState<number>(0);
 
-  // console.log({anime})
-
-  useEffect(() => {
-    if (data) {
-      const listCompletedAnimes = data.lists.find(
-        (list) => list.name === "Completed"
-      );
-
-      if (listCompletedAnimes) {
-        const completedAnimes = listCompletedAnimes.entries.map((entry) => {
-          const { media } = entry;
-          const altNames = [media.title.romaji.toLowerCase()];
-
-          if (media.title.english) {
-            altNames.push(media.title.english.toLowerCase());
-            altNames.push(media.title.english);
-          }
-
-          return {
-            id: media.idMal.toString(),
-            name: media.title.romaji,
-            englishName: media.title.english,
-            altNames,
-            image: media.coverImage.large,
-            genres: media.genres,
-            tags: media.tags.map((tag) => tag.name).slice(0, 3),
-            episodes: media.episodes,
-            seasonYear: media.seasonYear,
-            format: media.format,
-            season: media.season,
-            description: media.description,
-          };
-        });
-        setAnimes(
-          completedAnimes.toSorted((a, b) => {
-            if (a.seasonYear === b.seasonYear) {
-              return a.name.localeCompare(b.name);
-            }
-            return a.seasonYear - b.seasonYear;
-          })
-        );
-        setAnime(
-          completedAnimes[Math.floor(Math.random() * completedAnimes.length)]
-        );
-      }
-    }
-  }, [data]);
+  // console.log({anime}) 
 
   const addAnime = (anime: SearchAnime) => {
     if (!selectedAnimesIds.includes(anime.id)) {
@@ -124,7 +83,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     setState("play");
     setSelectedAnimes([]);
     setSelectedAnimesIds([]);
-    setAnime(animes[Math.floor(Math.random() * animes.length)]);
+    setAnime(getRandomByArray(animes));
     setShowMainGenre(false);
     setShowMainTag(false);
     setShowYears(false);

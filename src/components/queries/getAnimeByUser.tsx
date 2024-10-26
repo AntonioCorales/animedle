@@ -1,5 +1,4 @@
-import { MediaListCollection, ResponseAnime, ResponseAnimeByUser } from "@/types/anime";
-import { gql, useSuspenseQuery } from "@apollo/client";
+import { MediaListCollection } from "@/types/anime";
 import { useQuery } from "@tanstack/react-query";
 
 const queryAnimeByUser = `query Query($userName: String, $type: MediaType) {
