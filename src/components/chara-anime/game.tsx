@@ -1,4 +1,4 @@
-import { TitleStyles } from "../common";
+import { SubtitleStyles, TitleStyles } from "../common";
 import { useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
 import FlipCard from "./FlipCard";
@@ -10,9 +10,11 @@ import { WinComponent } from "./WinComponent";
 export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
   return (
-    <div className="flex flex-col gap-2 flex-1">
-      <TitleStyles>CharaAnime</TitleStyles>
-      <h2 className="text-center">Adivina el anime por sus personajes</h2>
+    <div className="flex flex-col gap-4 flex-1">
+      <div>
+        <TitleStyles>CharaAnime</TitleStyles>
+        <SubtitleStyles>Adivina el anime por sus personajes</SubtitleStyles>
+      </div>
       <WinComponent />
       {status === "init" && <Init />}
       {(status === "stale" ||
@@ -77,7 +79,7 @@ function Round() {
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
         {characters.map((character, index) => (
           <CardCharacter
-            key={index + character.character.malID}
+            key={index +"-"+ character.character.malID}
             characterData={character}
             onClick={() => {
               if (currentPosition === index) setCurrentPosition(index + 1);
@@ -133,7 +135,7 @@ function Controls() {
         onClick={nextRound}
         disabled={status !== "win-round"}
         className=" bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
-      >        
+      >
         Siguiente ronda
       </button>
     </div>

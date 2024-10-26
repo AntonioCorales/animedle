@@ -6,3 +6,9 @@ export function TitleStyles(props: React.HTMLAttributes<HTMLHeadingElement>) {
     />
   );
 }
+
+export function SubtitleStyles(props: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h2 {...props} className="text-center" />
+  );
+}

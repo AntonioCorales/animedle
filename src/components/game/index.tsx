@@ -6,13 +6,18 @@ import Table from "./Table";
 import { RestartAlt } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { TitleStyles } from "../common";
+import { SubtitleStyles, TitleStyles } from "../common";
 
 export default function AnimeDleGame() {
   const { addAnime, setState, anime, state } = useGameContext();
   return (
     <>
-      <TitleStyles>AnimeDle</TitleStyles>
+      <div>
+        <TitleStyles>AnimeDle</TitleStyles>
+        <SubtitleStyles>
+          Adivina el anime a partir de las diferentes pistas
+        </SubtitleStyles>
+      </div>
       <header className="flex flex-col gap-8 sticky top-0 pt-4 bg-[#0a0a0a] z-[999]">
         <div className="flex flex-col gap-4 pb-4">
           <Search
