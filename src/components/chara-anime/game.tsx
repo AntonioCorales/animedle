@@ -4,7 +4,7 @@ import { CharacterData } from "@/types/characters";
 import FlipCard from "./FlipCard";
 import { useState } from "react";
 import Image from "next/image";
-import Search from "../game/Search";
+import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
 
 export default function CharaAnimeGame() {
@@ -60,9 +60,16 @@ function Playing() {
   const { isLoading, addAnime, status } = useCharaAnimeContext();
   return (
     <div className="flex flex-col gap-4">
-      <Search
+      <SearchAnimeSelect
         onSelect={addAnime}
         disabled={isLoading || status === "win-round"}
+        className={`${
+          status === "win-round"
+            ? " outline-green-500 outline-2 disabled:outline-2"
+            : (status === "error-round"
+            ? " focus:outline-red-500 focus:outline-2 outline-red-500"
+            : undefined)
+        }`}
       />
       <Stats />
       <Round />
@@ -79,7 +86,7 @@ function Round() {
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
         {characters.map((character, index) => (
           <CardCharacter
-            key={index +"-"+ character.character.malID}
+            key={index + "-" + character.character.malID}
             characterData={character}
             onClick={() => {
               if (currentPosition === index) setCurrentPosition(index + 1);
@@ -204,7 +211,7 @@ function CardCharacter(props: CardCharacterProps) {
       <FlipCard
         frontContent={
           <div
-            className={`w-[225px] h-[350px] overflow-hidden rounded-md ${color} bg-slate-900`}
+            className={`w-[150px] h-[300px] md:w-[225px] md:h-[350px] overflow-hidden rounded-md ${color} bg-slate-900`}
           >
             <Image
               alt="character"

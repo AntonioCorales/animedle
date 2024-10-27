@@ -6,11 +6,15 @@ import { SearchAnime, useGameContext } from "./context";
 import Image from "next/image";
 import { CloseOutlined } from "@mui/icons-material";
 import { usePageContext } from "../context";
+import { useGetAnimeByUser } from "../queries/getAnimeByUser";
+import { formatAnimes, FormatAnimesOptions } from "../utils/useGetAnime";
 
-export default function Search(props: SearchProps) {
-  const { showMainGenre, showMainTag, showYears, onSelect } = props;
-  const { state } = useGameContext();
-  const { animes } = usePageContext();
+export default function SearchAnimeSelect(props: SearchProps) {
+  const { showMainGenre, showMainTag, showYears, onSelect, disabled, formatOptions } = props;
+  const { user } = usePageContext();
+  const { data, isLoading } = useGetAnimeByUser(user);
+
+  const [animes, setAnimes] = useState<SearchAnime[]>([]);
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +36,11 @@ export default function Search(props: SearchProps) {
       inputElement?.focus();
     }
   },[onSelect]);
+
+  useEffect(() => {
+    const animes = formatAnimes(data, formatOptions);
+    setAnimes(animes);
+  }, [data, formatOptions]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,7 +73,9 @@ export default function Search(props: SearchProps) {
 
     const handleEnter = (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        handleSelect(filteredAnimes[selectedIndex]);
+        const selectedAnime = filteredAnimes[selectedIndex];
+        if(!selectedAnime) return;
+        handleSelect(selectedAnime);
       }
     };
 
@@ -110,11 +121,12 @@ export default function Search(props: SearchProps) {
           value={search}
           placeholder="Buscar"
           onChange={(e) => setSearch(e.target.value)}
-          disabled={state === "win" || props.disabled}
+          disabled={disabled}
+          className={props.className}
         />
         <button
           className={`absolute bottom-[2px] text-sm right-2 p-2 rounded-md bg-slate-900 text-white hover:bg-slate-800 ${
-            isOpen && search && state === "play" ? "" : "hidden"
+            (isOpen && search && !disabled) ? "" : "hidden"
           }`}
           onClick={() => {
             setSearch("");
@@ -124,7 +136,7 @@ export default function Search(props: SearchProps) {
           <CloseOutlined />
         </button>
       </div>
-      {search && (state === "stale" || state === "play") && (
+      {(search && !disabled) && (
         <div
           id="options-search"
           className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
@@ -228,4 +240,6 @@ type SearchProps = {
   showMainTag?: boolean;
   showYears?: boolean;
   onSelect?: (anime: SearchAnime) => void;
+  formatOptions?: FormatAnimesOptions;
+  className?: string;
 };

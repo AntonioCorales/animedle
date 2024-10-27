@@ -19,7 +19,7 @@ const PageContext = createContext<PageContext>({
 export function PageProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<string>("DoubleCReacts");
   const { animes } = useGetAndFormatAnimes(user, {
-    tagsLimit: 5,
+    tagsLimit: 4,
   });
 
   return (

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, useGetAndFormatAnimes } from "../utils/useGetAnime";
 import { getRandomByArray } from "../utils/functions";
+import { usePageContext } from "../context";
 
 export type SearchAnime = {
   id: number;
@@ -55,11 +56,12 @@ const GameContext = createContext<GameContextType>({
 });
 
 export function GameProvider({ children }: React.PropsWithChildren) {
-  const { animes, isLoading } = useGetAndFormatAnimes("DoubleCReacts", {
-    tagsLimit: 4,
-    types: ["Completed"],
-  });
-  const anime = getRandomByArray(animes);
+  const { user } = usePageContext();
+  const { data, isLoading } = useGetAnimeByUser(user);
+  
+  const [animes, setAnimes] = useState<SearchAnime[]>([]);
+  const [anime, setAnime] = useState(getRandomByArray(animes));
+  console.log({anime});
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [selectedAnimesIds, setSelectedAnimesIds] = useState<number[]>([]);
@@ -76,7 +78,14 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     }
   };  
 
+  useEffect(() => {
+    const animes = formatAnimes(data, {tagsLimit: 4, types: ["Completed"]});
+    setAnimes(animes);
+    setAnime(getRandomByArray(animes));
+  }, [data]);
+
   const resetGame = () => {
+    setAnime(getRandomByArray(animes));
     setState("stale");
     setSelectedAnimes([]);
     setSelectedAnimesIds([]);
@@ -112,11 +121,4 @@ export function GameProvider({ children }: React.PropsWithChildren) {
 
 export function useGameContext() {
   return useContext(GameContext);
-}
-
-function useGetAnimeRandom(animes?: SearchAnime[] | null) {
-  const [anime, setAnime] = useState<SearchAnime | null>();
-
-
-  return { anime };
 }

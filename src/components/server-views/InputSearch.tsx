@@ -1,6 +1,4 @@
-
 export default function InputSearch(props: InputSearchProps) {
-  
   return (
     <label className="flex flex-col gap-1 flex-1">
       <span className="">Ingrese el nombre del anime</span>
@@ -8,7 +6,10 @@ export default function InputSearch(props: InputSearchProps) {
       <input
         type="text"
         {...props}
-        className="w-full rounded-md border-2 bg-slate-900 text-white outline-none py-2 px-4"
+        className={
+          "w-full rounded-md outline outline-1 bg-slate-900 text-white py-2 px-4 focus:outline-2 focus:outline-white" +
+          (props.className ? ` ${props.className}` : "")
+        }
       />
     </label>
   );

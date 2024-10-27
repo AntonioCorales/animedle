@@ -1,7 +1,7 @@
 "use client";
 import ConfettiExplosion from "react-confetti";
 import { useGameContext } from "./context";
-import Search from "./Search";
+import SearchAnimeSelect from "./Search";
 import Table from "./Table";
 import { RestartAlt } from "@mui/icons-material";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export default function AnimeDleGame() {
       </div>
       <header className="flex flex-col gap-8 sticky top-0 pt-4 bg-[#0a0a0a] z-[999]">
         <div className="flex flex-col gap-4 pb-4">
-          <Search
+          <SearchAnimeSelect
             onSelect={(selectedAnime) => {
               if (state === "play" || state === "stale") {
                 addAnime(selectedAnime);
@@ -42,6 +42,8 @@ export default function AnimeDleGame() {
               }
               setCounterState("play");
             }}
+            disabled={state === "win"}
+            formatOptions={{tagsLimit: 4, types: ["Completed"]}}
           />
           <Actions />
           <Status />

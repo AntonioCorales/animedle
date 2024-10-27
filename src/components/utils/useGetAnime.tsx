@@ -4,7 +4,7 @@ import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { getRandomByArray } from "./functions";
 import { useEffect, useState } from "react";
 
-type FormatAnimesOptions = {
+export type FormatAnimesOptions = {
   types?: ListName[];
   tagsLimit?: number;
 };
