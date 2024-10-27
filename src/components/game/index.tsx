@@ -7,9 +7,11 @@ import { RestartAlt } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { SubtitleStyles, TitleStyles } from "../common";
+import { useCounterContext } from "./counter-context";
 
 export default function AnimeDleGame() {
   const { addAnime, setState, anime, state } = useGameContext();
+  const {setState: setCounterState} = useCounterContext();
   return (
     <>
       <div>
@@ -22,7 +24,7 @@ export default function AnimeDleGame() {
         <div className="flex flex-col gap-4 pb-4">
           <Search
             onSelect={(selectedAnime) => {
-              if (state === "play") {
+              if (state === "play" || state === "stale") {
                 addAnime(selectedAnime);
 
                 window.scrollTo({
@@ -35,8 +37,10 @@ export default function AnimeDleGame() {
                 setTimeout(() => {
                   setState("win");
                 }, 300 * 5);
+                setCounterState("pause");
                 return;
               }
+              setCounterState("play");
             }}
           />
           <Actions />
@@ -60,6 +64,12 @@ function Actions() {
   } = useGameContext();
   const { length } = selectedAnimes;
   const description = formatDescription(anime?.description);
+  const { reset } = useCounterContext();
+
+  const handleReset = () => {
+    resetGame();
+    reset();
+  };
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col lg:flex-row lg:gap-4  lg:items-center">
@@ -112,7 +122,7 @@ function Actions() {
       <div className="flex gap-2 justify-center items-start">
         <button
           className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10"
-          onClick={resetGame}
+          onClick={handleReset}
         >
           <RestartAlt />
         </button>
@@ -128,7 +138,8 @@ function Actions() {
 }
 
 function Status() {
-  const { state, counter, selectedAnimes } = useGameContext();
+  const { state, selectedAnimes } = useGameContext();
+  const { counter } = useCounterContext();
   const { length } = selectedAnimes;
   return (
     <div className="flex flex-row gap-2 justify-between items-end">

@@ -60,7 +60,10 @@ export function formatAnimes(
   });
 }
 
-export function useGetAndFormatAnimes(user: string, options?: FormatAnimesOptions) { 
+export function useGetAndFormatAnimes(
+  user: string,
+  options?: FormatAnimesOptions
+) {
   const { data, isLoading } = useGetAnimeByUser(user);
   const animes = formatAnimes(data, options);
 
@@ -70,7 +73,10 @@ export function useGetAndFormatAnimes(user: string, options?: FormatAnimesOption
   };
 }
 
-export function useGetAndFormatRandomAnime(user: string, options?: FormatAnimesOptions) {
+export function useGetAndFormatRandomAnime(
+  user: string,
+  options?: FormatAnimesOptions
+) {
   const { data, isLoading } = useGetAnimeByUser(user);
 
   const [anime, setAnime] = useState<SearchAnime>();

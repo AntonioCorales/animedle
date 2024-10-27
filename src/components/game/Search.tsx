@@ -15,9 +15,9 @@ export default function Search(props: SearchProps) {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const filteredAnimes = useFilteredAnimes(animes, search);
+  const filteredAnimes = useFilteredAnimes(animes, search);  
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);  
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -124,7 +124,7 @@ export default function Search(props: SearchProps) {
           <CloseOutlined />
         </button>
       </div>
-      {search && state === "play" && (
+      {search && (state === "stale" || state === "play") && (
         <div
           id="options-search"
           className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "

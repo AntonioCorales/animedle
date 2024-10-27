@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, useGetAndFormatAnimes } from "../utils/useGetAnime";
 import { getRandomByArray } from "../utils/functions";
@@ -19,10 +19,10 @@ export type SearchAnime = {
   description?: string | null;
 };
 
-type GameState = "play" | "win";
+type GameState = "stale" | "play" | "win";
 
 type GameContextType = {
-  animes?: SearchAnime[] ;
+  animes?: SearchAnime[];
   anime?: SearchAnime | null;
   selectedAnimes: SearchAnime[];
   selectedAnimesIds: number[];
@@ -36,7 +36,6 @@ type GameContextType = {
   setShowMainGenre: (showMainGenre: boolean) => void;
   showMainTag: boolean;
   setShowMainTag: (showMainTags: boolean) => void;
-  counter: number;
 };
 
 const GameContext = createContext<GameContextType>({
@@ -53,50 +52,39 @@ const GameContext = createContext<GameContextType>({
   setShowMainGenre: () => {},
   showMainTag: false,
   setShowMainTag: () => {},
-  counter: 0,
 });
 
 export function GameProvider({ children }: React.PropsWithChildren) {
   const { animes, isLoading } = useGetAndFormatAnimes("DoubleCReacts", {
-    tagsLimit: 5,
+    tagsLimit: 4,
     types: ["Completed"],
   });
-  const [anime, setAnime] = useState<SearchAnime | null>(getRandomByArray(animes));
+  const anime = getRandomByArray(animes);
+
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [selectedAnimesIds, setSelectedAnimesIds] = useState<number[]>([]);
-  const [state, setState] = useState<GameState>("play");
+  const [state, setState] = useState<GameState>("stale");
   const [showYears, setShowYears] = useState<boolean>(false);
   const [showMainGenre, setShowMainGenre] = useState<boolean>(false);
   const [showMainTag, setShowMainTag] = useState<boolean>(false);
-  const [counter, setCounter] = useState<number>(0);
 
   const addAnime = (anime: SearchAnime) => {
+    setState("play");
     if (!selectedAnimesIds.includes(anime.id)) {
       setSelectedAnimesIds([...selectedAnimesIds, anime.id]);
       setSelectedAnimes([anime, ...selectedAnimes]);
     }
-  };
+  };  
 
   const resetGame = () => {
-    setState("play");
+    setState("stale");
     setSelectedAnimes([]);
     setSelectedAnimesIds([]);
     setShowMainGenre(false);
     setShowMainTag(false);
-    setShowYears(false);
-    setCounter(0);
-  };
+    setShowYears(false);    
+  };  
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (state === "play") {
-        setCounter((counter) => counter + 1);
-      }
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, [counter, state]);
-
- 
 
   return (
     <GameContext.Provider
@@ -115,7 +103,6 @@ export function GameProvider({ children }: React.PropsWithChildren) {
         setShowMainGenre,
         showMainTag,
         setShowMainTag,
-        counter,
       }}
     >
       {children}
@@ -125,4 +112,11 @@ export function GameProvider({ children }: React.PropsWithChildren) {
 
 export function useGameContext() {
   return useContext(GameContext);
+}
+
+function useGetAnimeRandom(animes?: SearchAnime[] | null) {
+  const [anime, setAnime] = useState<SearchAnime | null>();
+
+
+  return { anime };
 }
