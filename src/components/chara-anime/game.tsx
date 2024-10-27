@@ -211,7 +211,7 @@ function CardCharacter(props: CardCharacterProps) {
       <FlipCard
         frontContent={
           <div
-            className={`w-[150px] h-[300px] md:w-[225px] md:h-[350px] overflow-hidden rounded-md ${color} bg-slate-900`}
+            className={`w-[150px] h-[280px] md:w-[225px] md:h-[350px] overflow-hidden rounded-md ${color} bg-slate-900`}
           >
             <Image
               alt="character"
@@ -224,7 +224,7 @@ function CardCharacter(props: CardCharacterProps) {
         }
         backContent={
           <div
-            className={`w-[225px] h-[350px] rounded-md flex flex-col gap-2 justify-center items-center cursor-pointer ${color}`}
+            className={`w-[150px] h-[280px] md:w-[225px] md:h-[350px] rounded-md flex flex-col gap-2 justify-center items-center cursor-pointer ${color}`}
           >
             <Image alt="card" src={"/logo-md.webp"} width={50} height={50} />
             <span className="uppercase text-xl font-mono font-bold">
