@@ -6,6 +6,7 @@ import { useState } from "react";
 import Image from "next/image";
 import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
+import { ArrowRight, ArrowRightAlt, RestartAlt } from "@mui/icons-material";
 
 export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
@@ -125,10 +126,13 @@ function Controls() {
   return (
     <div className="flex gap-2 justify-between items-center">
       <button
-        className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
+        className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
         onClick={initGame}
       >
-        Reiniciar
+        
+        <RestartAlt />
+        <span className="hidden md:flex md:ml-2">Reiniciar</span> 
+        
       </button>
 
       {status === "win-round" && (
@@ -141,9 +145,10 @@ function Controls() {
       <button
         onClick={nextRound}
         disabled={status !== "win-round"}
-        className=" bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+        className="flex bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
       >
-        Siguiente ronda
+       <span className="hidden md:flex md:mr-2">Siguiente ronda</span> 
+       <ArrowRightAlt />
       </button>
     </div>
   );
