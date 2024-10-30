@@ -17,7 +17,7 @@ export default function CharaAnimeGame() {
         <TitleStyles>CharaAnime</TitleStyles>
         <SubtitleStyles>Adivina el anime por sus personajes</SubtitleStyles>
       </div>
-      <WinComponent />
+
       {status === "init" && <Init />}
       {(status === "stale" ||
         status === "playing" ||
@@ -87,8 +87,8 @@ function Round() {
   const { characters, currentPosition, setCurrentPosition, status } =
     useCharaAnimeContext();
 
-  console.log({status})
-    
+  console.log({ status });
+
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
@@ -176,23 +176,61 @@ function Controls() {
 function End() {
   const { totalPoints, rounds, totalRounds, initGame } = useCharaAnimeContext();
   const totalTries = rounds.reduce(
-    (prev, curr) => prev + curr.selectedAnimes.length,
+    (prev, curr) => prev + (curr.selectedAnimes.length ?? 1) ,
     0
   );
   const maxPoints = totalRounds * 40;
+  const precision = Math.round((totalTries / totalRounds) * 1000) / 10;
+  const textClass =
+    precision <= 25
+      ? "text-red-400"
+      : precision <= 50
+      ? "text-orange-400"
+      : precision <= 75
+      ? "text-yellow-400"
+      : "text-green-400";
 
+  const pointsPercent = Math.round((totalPoints / maxPoints) * 1000) / 10;
+  const pointsClass =
+    pointsPercent <= 25
+      ? "text-red-400"
+      : pointsPercent <= 50
+      ? "text-orange-400"
+      : pointsPercent <= 75
+      ? "text-yellow-400"
+      : "text-green-400";
+
+  const pointsText =
+    pointsPercent <= 25
+      ? "¡¿Cómo sacaste tan pocos puntos?!"
+      : pointsPercent <= 50
+      ? "Igual no esperaba nada..."
+      : pointsPercent <= 75
+      ? "¡Bueno, pero no tanto!" :
+      pointsPercent <= 90 ? "¡¿Como llegaste tan lejos?!" :
+      "¡¡GOOOOOD!!";
+      
   return (
-    <div className="flex flex-col gap-2 justify-center items-center pb-64 flex-1">
-      <span className="text-green-300 text-2xl">¡Felicidades!</span>
+    <div className="flex flex-col gap-3 justify-center items-center pb-64 flex-1">
+      {
+        pointsPercent > 25 && <WinComponent />
+      }
+      
+      <span className={"text-2xl leading-5"}>{"¡Finalizado!"}</span>
+      <span className={"text-lg " + pointsClass}>{pointsText}</span>
       {maxPoints === totalPoints && totalTries === totalRounds && (
         <span className="text-xl text-sky-400">¡Puntuación perfecta!</span>
       )}
       <span>
         Has obtenido {totalPoints} de {maxPoints} puntos
       </span>
-      <span>
-        Has intentado {totalTries} veces en {totalRounds} rondas{" "}
-      </span>
+      <div className="flex flex-col text-center ">
+        <span className={`text-2xl ${textClass} relative leading-5`}>
+          {precision}
+          <span className="text-xs absolute right bottom-0">%</span>
+        </span>
+        <span className="text-sm">precisión</span>
+      </div>
       <button
         className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
         onClick={initGame}
@@ -283,7 +321,7 @@ function AnimesSelected() {
 
   return (
     <div className="flex flex-col gap-2">
-      {selectedAnimes.map((selectedAnime) => (
+      {selectedAnimes.map((selectedAnime, index) => (
         <AnimeSelectedCard key={selectedAnime.name} anime={selectedAnime} />
       ))}
     </div>
@@ -297,7 +335,8 @@ interface AnimeSelectedCardProps {
 function AnimeSelectedCard(props: AnimeSelectedCardProps) {
   const { animes } = useCharaAnimeContext();
   const { anime } = props;
-  const isCorrect = animes.map((a) => a.id).includes(anime.id);
+  console.log({anime, animes})
+  const isCorrect = animes.some((a) => a.id === anime.id || a.idMal === anime.idMal || a.name.toLowerCase().includes(anime.name.toLowerCase()));
 
   return (
     <div
@@ -306,7 +345,7 @@ function AnimeSelectedCard(props: AnimeSelectedCardProps) {
       }`}
     >
       <div>
-        <img src={anime.image} alt={anime.name} height={70} width={40} />
+        <img src={anime.image} alt={anime.name} height={60} width={40} />
       </div>
       <div className="flex flex-1">{anime.name}</div>
     </div>
