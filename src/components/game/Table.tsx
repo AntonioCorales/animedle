@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { SearchAnime, useGameContext } from "./context";
 import {
   DetailedHTMLProps,
@@ -65,7 +64,7 @@ function TableItem(
     <tr {...rest}>
       <td className="text-left w-[140px] flex justify-center ">
         <div className="gap-2 font-bold text-center w-fit text-xs flex flex-col">
-          <Image
+          <img
             src={anime.image}
             className="rounded-md m-auto"
             alt={anime.name}

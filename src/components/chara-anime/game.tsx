@@ -5,8 +5,9 @@ import FlipCard from "./FlipCard";
 import { useState } from "react";
 import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
-import { ArrowRightAlt, RestartAlt } from "@mui/icons-material";
+import { ArrowRightAlt, Check, Close, RestartAlt } from "@mui/icons-material";
 import { SearchAnime } from "../game/context";
+import styled from "styled-components";
 
 export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
@@ -115,13 +116,27 @@ function Round() {
 }
 
 function Stats() {
-  const { totalRounds, currentRound, totalPoints, addPoints } =
+  const { totalRounds, currentRound, totalPoints, status } =
     useCharaAnimeContext();
   return (
-    <div className="flex flex-row gap-2 items-center justify-between">
+    <div className="flex flex-row gap-2 items-end justify-between">
       <span className="text-green-300">
         Ronda: {currentRound}/{totalRounds}
       </span>
+      {status === "win-round" && (
+        <AnimationPulseStyles>
+          <span className="text-green-300 text-xl leading-4">
+            <Check />
+          </span>
+        </AnimationPulseStyles>
+      )}
+      {status === "error-round" && (
+        <AnimationPulseStyles>
+          <span className="text-red-500 text-xl leading-4">
+            <Close />
+          </span>
+        </AnimationPulseStyles>
+      )}
       <span>Puntos: {totalPoints}</span>
     </div>
   );
@@ -138,37 +153,29 @@ function Controls() {
   } = useCharaAnimeContext();
 
   return (
-    <div className="flex gap-2 justify-between items-center">
+    <div className="flex gap-2 justify-center md:justify-between items-center">
       <button
-        className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
+        className="bg-sky-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
         onClick={initGame}
       >
         <RestartAlt />
         <span className="hidden md:flex md:ml-2">Reiniciar</span>
       </button>
 
-      {status === "win-round" && (
-        <span className="text-green-300 text-xl">¡Correcto! </span>
-      )}
-      {status === "error-round" && (
-        <span className="text-red-500 text-xl">¡Incorrecto! </span>
-      )}
-      <div className="flex gap-2">
-        <button
-          onClick={nextRound}
-          disabled={status !== "win-round" && currentPosition !== 4}
-          className="flex bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
-        >
-          <span className="hidden md:flex md:mr-2">
-            {currentRound === totalRounds
-              ? "Finalizar"
-              : status === "win-round"
-              ? "Siguiente"
-              : "Pasar"}
-          </span>
-          <ArrowRightAlt />
-        </button>
-      </div>
+      <button
+        onClick={nextRound}
+        disabled={status !== "win-round" && currentPosition !== 4}
+        className="flex bg-green-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+      >
+        <span className="hidden md:flex md:mr-2">
+          {currentRound === totalRounds
+            ? "Finalizar"
+            : status === "win-round"
+            ? "Siguiente"
+            : "Pasar"}
+        </span>
+        <ArrowRightAlt />
+      </button>
     </div>
   );
 }
@@ -176,11 +183,12 @@ function Controls() {
 function End() {
   const { totalPoints, rounds, totalRounds, initGame } = useCharaAnimeContext();
   const totalTries = rounds.reduce(
-    (prev, curr) => prev + (curr.selectedAnimes.length ?? 1) ,
+    (prev, curr) => prev + curr.selectedAnimes.length,
     0
   );
   const maxPoints = totalRounds * 40;
-  const precision = Math.round((totalTries / totalRounds) * 1000) / 10;
+  const precision =
+    totalTries === 0 ? 0 : Math.round((totalRounds / totalTries) * 1000) / 10;
   const textClass =
     precision <= 25
       ? "text-red-400"
@@ -201,21 +209,22 @@ function End() {
       : "text-green-400";
 
   const pointsText =
-    pointsPercent <= 25
+    pointsPercent <= 10
+      ? "Si no lo hiciste apropósito... no lo entiendo"
+      : pointsPercent <= 25
       ? "¡¿Cómo sacaste tan pocos puntos?!"
       : pointsPercent <= 50
       ? "Igual no esperaba nada..."
       : pointsPercent <= 75
-      ? "¡Bueno, pero no tanto!" :
-      pointsPercent <= 90 ? "¡¿Como llegaste tan lejos?!" :
-      "¡¡GOOOOOD!!";
-      
+      ? "¡Bueno, pero no tanto!"
+      : pointsPercent <= 90
+      ? "¡¿Como llegaste tan lejos?!"
+      : "¡¡GOOOOOD!!";
+
   return (
     <div className="flex flex-col gap-3 justify-center items-center pb-64 flex-1">
-      {
-        pointsPercent > 25 && <WinComponent />
-      }
-      
+      {pointsPercent > 25 && <WinComponent />}
+
       <span className={"text-2xl leading-5"}>{"¡Finalizado!"}</span>
       <span className={"text-lg " + pointsClass}>{pointsText}</span>
       {maxPoints === totalPoints && totalTries === totalRounds && (
@@ -304,7 +313,7 @@ function CardCharacter(props: CardCharacterProps) {
 
 function CardCharacterSkeleton() {
   return (
-    <div className="w-[225px] h-[350px] overflow-hidden rounded-md bg-slate-900 flex items-center justify-center">
+    <div className="w-[150px] h-[280px] md:w-[225px] md:h-[350px] overflow-hidden rounded-md bg-slate-900 flex items-center justify-center">
       <img
         alt="card"
         src={"/logo-md.webp"}
@@ -335,8 +344,13 @@ interface AnimeSelectedCardProps {
 function AnimeSelectedCard(props: AnimeSelectedCardProps) {
   const { animes } = useCharaAnimeContext();
   const { anime } = props;
-  console.log({anime, animes})
-  const isCorrect = animes.some((a) => a.id === anime.id || a.idMal === anime.idMal || a.name.toLowerCase().includes(anime.name.toLowerCase()));
+  console.log({ anime, animes });
+  const isCorrect = animes.some(
+    (a) =>
+      a.id === anime.id ||
+      a.idMal === anime.idMal ||
+      a.name.toLowerCase().includes(anime.name.toLowerCase())
+  );
 
   return (
     <div
@@ -351,3 +365,21 @@ function AnimeSelectedCard(props: AnimeSelectedCardProps) {
     </div>
   );
 }
+
+const AnimationPulseStyles = styled.div`
+  animation: pulse 1s;
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.6);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+`;
+
+function AnimationPulse(props?: { children?: React.ReactNode }) {}

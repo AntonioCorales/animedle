@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import InputSearch from "../server-views/InputSearch";
 import { SearchAnime, useGameContext } from "./context";
-import Image from "next/image";
 import { CloseOutlined } from "@mui/icons-material";
 import { usePageContext } from "../context";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
@@ -150,7 +149,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
               }}
             >
               <div className="min-w-[60px] max-w-[60px]">
-                <Image
+                <img
                   src={filteredAnime.image}
                   className="rounded-md w-full"
                   alt={filteredAnime.name}
