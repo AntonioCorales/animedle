@@ -9,7 +9,15 @@ import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, FormatAnimesOptions } from "../utils/useGetAnime";
 
 export default function SearchAnimeSelect(props: SearchProps) {
-  const { showMainGenre, showMainTag, showYears, onSelect, disabled, formatOptions } = props;
+  const {
+    showMainGenre,
+    showMainTag,
+    showYears,
+    onSelect,
+    disabled,
+    formatOptions,
+    excludeAnimes,
+  } = props;
   const { user } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
 
@@ -18,23 +26,26 @@ export default function SearchAnimeSelect(props: SearchProps) {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const filteredAnimes = useFilteredAnimes(animes, search);  
+  const filteredAnimes = useFilteredAnimes(excludeAnimes ?? [], animes, search);
 
-  const [selectedIndex, setSelectedIndex] = useState(0);  
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleSelect = useCallback((anime: SearchAnime) => {
-    onSelect?.(anime);
-    setSearch("");
-    setIsOpen(false);
-    if (ref.current) {
-      const inputElement = ref.current?.querySelector(
-        "input"
-      ) as HTMLInputElement;
-      inputElement?.focus();
-    }
-  },[onSelect]);
+  const handleSelect = useCallback(
+    (anime: SearchAnime) => {
+      onSelect?.(anime);
+      setSearch("");
+      setIsOpen(false);
+      if (ref.current) {
+        const inputElement = ref.current?.querySelector(
+          "input"
+        ) as HTMLInputElement;
+        inputElement?.focus();
+      }
+    },
+    [onSelect]
+  );
 
   useEffect(() => {
     const animes = formatAnimes(data, formatOptions);
@@ -61,11 +72,14 @@ export default function SearchAnimeSelect(props: SearchProps) {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowDown") {
-        setSelectedIndex((prevIndex) => (prevIndex + 1) % filteredAnimes.length);
+        setSelectedIndex(
+          (prevIndex) => (prevIndex + 1) % filteredAnimes.length
+        );
       }
       if (event.key === "ArrowUp") {
-        setSelectedIndex((prevIndex) =>
-          (prevIndex + filteredAnimes.length - 1) % filteredAnimes.length
+        setSelectedIndex(
+          (prevIndex) =>
+            (prevIndex + filteredAnimes.length - 1) % filteredAnimes.length
         );
       }
     };
@@ -73,7 +87,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
     const handleEnter = (event: KeyboardEvent) => {
       if (event.key === "Enter") {
         const selectedAnime = filteredAnimes[selectedIndex];
-        if(!selectedAnime) return;
+        if (!selectedAnime) return;
         handleSelect(selectedAnime);
       }
     };
@@ -125,7 +139,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
         />
         <button
           className={`absolute bottom-[2px] text-sm right-2 p-1 rounded-md bg-slate-900 text-white hover:bg-slate-800 ${
-            (isOpen && search && !disabled) ? "" : "hidden"
+            isOpen && search && !disabled ? "" : "hidden"
           }`}
           onClick={() => {
             setSearch("");
@@ -135,7 +149,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
           <CloseOutlined />
         </button>
       </div>
-      {(search && !disabled) && (
+      {search && !disabled && (
         <div
           id="options-search"
           className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
@@ -143,7 +157,11 @@ export default function SearchAnimeSelect(props: SearchProps) {
           {filteredAnimes?.map((filteredAnime, index) => (
             <div
               key={filteredAnime.id}
-              className={`flex flex-row gap-3 p-2 hover:bg-slate-800 cursor-pointer ${selectedIndex === index ? "bg-slate-700 selected hover:bg-slate-700" : ""}`}
+              className={`flex flex-row gap-3 p-2 hover:bg-slate-800 cursor-pointer ${
+                selectedIndex === index
+                  ? "bg-slate-700 selected hover:bg-slate-700"
+                  : ""
+              }`}
               onClick={() => {
                 handleSelect(filteredAnime);
               }}
@@ -151,7 +169,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
               <div className="min-w-[60px] max-w-[60px]">
                 <img
                   src={filteredAnime.image}
-                  className="rounded-md w-full"
+                  className="rounded-md w-full object-cover"
                   alt={filteredAnime.name}
                   width={60}
                   height={85}
@@ -188,9 +206,12 @@ export default function SearchAnimeSelect(props: SearchProps) {
   );
 }
 
-function useFilteredAnimes(animes?: SearchAnime[], search?: string) {
+function useFilteredAnimes(
+  selectedAnimesIds: number[],
+  animes?: SearchAnime[],
+  search?: string
+) {
   const [filteredAnimes, setFilteredAnimes] = useState<SearchAnime[]>([]);
-  const { selectedAnimesIds } = useGameContext();
 
   useEffect(() => {
     if (search && animes) {
@@ -241,4 +262,5 @@ type SearchProps = {
   onSelect?: (anime: SearchAnime) => void;
   formatOptions?: FormatAnimesOptions;
   className?: string;
+  excludeAnimes?: number[];
 };

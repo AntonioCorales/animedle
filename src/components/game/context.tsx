@@ -60,8 +60,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
   const { data, isLoading } = useGetAnimeByUser(user);
   
   const [animes, setAnimes] = useState<SearchAnime[]>([]);
-  const [anime, setAnime] = useState(getRandomByArray(animes));
-  console.log({anime});
+  const [anime, setAnime] = useState(getRandomByArray(animes));  
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [selectedAnimesIds, setSelectedAnimesIds] = useState<number[]>([]);

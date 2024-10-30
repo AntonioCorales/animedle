@@ -109,11 +109,11 @@ export function CharaAnimeProvider({
     animes,
   } = useGetCharactersToCharaAnime(animesAlreadyShowed);
 
-  const initRound = () => {    
+  const initRound = () => {
     redo();
     setCurrentPosition(0);
     setSelectedAnimes([]);
-   
+
     setTimeout(() => {
       setStatus("stale");
     }, 300);
@@ -145,7 +145,6 @@ export function CharaAnimeProvider({
           anime.name.includes(a.name)
       )
     ) {
-      
       const points = 40 - 10 * (currentPosition - 1);
       addPoints(points);
       setRounds((prev) => [
@@ -169,7 +168,7 @@ export function CharaAnimeProvider({
     setStatus("win");
   };
 
-  const nextRound = () => {    
+  const nextRound = () => {
     setStatus("loading");
     setAnimesAlreadyShowed((prev) => [...prev, ...animes.map((a) => a.id)]);
     if (totalRounds !== 0 && currentRound === totalRounds) {
@@ -214,9 +213,7 @@ export function CharaAnimeProvider({
   );
 }
 
-export function useGetCharactersToCharaAnime(
-  alreadyShowed: number[]
-) {
+export function useGetCharactersToCharaAnime(alreadyShowed: number[]) {
   const { user } = usePageContext();
   const {
     anime,
@@ -243,16 +240,25 @@ export function useGetCharactersToCharaAnime(
   }, [charactersData]);
 
   useEffect(() => {
-    const animesToReturn =
+    if (!anime) return;
+    const animesToReturn = [
+      {
+        id: anime.id,
+        idMal: anime.idMal,
+        name: anime.name,
+        englishName: anime.englishName,
+      },
+    ].concat(
       animes?.map((anime) => ({
         id: anime.id,
         idMal: anime.idMal,
         name: anime.title.romaji,
         englishName: anime.title.english,
-      })) ?? [];
+      })) ?? []
+    );
 
     setAnimesToReturn(animesToReturn);
-  }, [animes]);
+  }, [animes, anime]);
 
   return {
     characters: charactersToReturn,

@@ -61,7 +61,8 @@ function Init() {
 }
 
 function Playing() {
-  const { isLoading, addAnime, status } = useCharaAnimeContext();
+  const { isLoading, addAnime, status, selectedAnimes } =
+    useCharaAnimeContext();
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,6 +76,7 @@ function Playing() {
             ? "focus-within:outline-red-500 focus-within:outline-2 outline-red-500"
             : undefined
         }`}
+        excludeAnimes={selectedAnimes.map((anime) => anime.id)}
       />
       <Stats />
       <Round />
@@ -87,8 +89,6 @@ function Playing() {
 function Round() {
   const { characters, currentPosition, setCurrentPosition, status } =
     useCharaAnimeContext();
-
-  console.log({ status });
 
   return (
     <div className="flex flex-col gap-4 items-center">
@@ -330,8 +330,11 @@ function AnimesSelected() {
 
   return (
     <div className="flex flex-col gap-2">
-      {selectedAnimes.map((selectedAnime, index) => (
-        <AnimeSelectedCard key={selectedAnime.name} anime={selectedAnime} />
+      {selectedAnimes.map((selectedAnime) => (
+        <AnimeSelectedCard
+          key={selectedAnime.name + selectedAnime.id}
+          anime={selectedAnime}
+        />
       ))}
     </div>
   );
@@ -344,25 +347,27 @@ interface AnimeSelectedCardProps {
 function AnimeSelectedCard(props: AnimeSelectedCardProps) {
   const { animes } = useCharaAnimeContext();
   const { anime } = props;
-  console.log({ anime, animes });
   const isCorrect = animes.some(
     (a) =>
       a.id === anime.id ||
       a.idMal === anime.idMal ||
-      a.name.toLowerCase().includes(anime.name.toLowerCase())
+      a.name.toLowerCase().includes(anime.name.toLowerCase()) ||
+      anime.name.toLowerCase().includes(a.name.toLowerCase())
   );
 
   return (
-    <div
-      className={`flex gap-2 p-2 rounded-md ${
-        isCorrect ? "bg-green-700" : "bg-red-600"
-      }`}
-    >
-      <div>
-        <img src={anime.image} alt={anime.name} height={60} width={40} />
+    <CardAnimationPuseStyles>
+      <div
+        className={`flex gap-2 p-2 rounded-md ${
+          isCorrect ? "bg-green-700" : "bg-red-600"
+        }`}
+      >
+        <div>
+          <img src={anime.image} alt={anime.name} height={60} width={40} />
+        </div>
+        <div className="flex flex-1">{anime.name}</div>
       </div>
-      <div className="flex flex-1">{anime.name}</div>
-    </div>
+    </CardAnimationPuseStyles>
   );
 }
 
@@ -374,7 +379,7 @@ const AnimationPulseStyles = styled.div`
       transform: scale(1);
     }
     50% {
-      transform: scale(1.6);
+      transform: scale(1.7);
     }
     100% {
       transform: scale(1);
@@ -382,4 +387,17 @@ const AnimationPulseStyles = styled.div`
   }
 `;
 
-function AnimationPulse(props?: { children?: React.ReactNode }) {}
+const CardAnimationPuseStyles = styled.div`
+  animation: pulse 1s;
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+`
