@@ -2,11 +2,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useGetAndFormatRandomAnime } from "../utils/useGetAnime";
 import { useGetCharactersByAnimeIdMAL } from "../queries/getCharactersByAnime";
 import { CharacterData } from "@/types/characters";
-import {
-  useGetAnimesRelatedToAL,
-  useGetAnimesRelatedToMAL,
-} from "../queries/getAnimesRelatedTo";
+import { useGetAnimesRelatedToAL } from "../queries/getAnimesRelatedTo";
 import { usePageContext } from "../context";
+import { SearchAnime } from "../game/context";
 
 type CharaAnimeStatus =
   | "loading"
@@ -48,12 +46,15 @@ export type CharaAnimeContext = {
   addPoints: (points: number) => void;
   time: number;
   animesAlreadyShowed: number[];
-  addAnime: (anime: MinAnimeData) => boolean;
+  addAnime: (anime: SearchAnime) => boolean;
   winGame: () => void;
   nextRound: () => void;
   currentPosition: number;
   setCurrentPosition: (position: number) => void;
   initGame: () => void;
+  numCharacters: number;
+  setNumCharacters: (position: number) => void;
+  selectedAnimes: SearchAnime[];
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -78,6 +79,9 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   currentPosition: 0,
   setCurrentPosition: () => {},
   initGame: () => {},
+  numCharacters: 0,
+  setNumCharacters: () => {},
+  selectedAnimes: [],
 });
 
 export function CharaAnimeProvider({
@@ -92,18 +96,27 @@ export function CharaAnimeProvider({
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [time, setTime] = useState<number>(0);
   const [animesAlreadyShowed, setAnimesAlreadyShowed] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [numCharacters, setNumCharacters] = useState(4);
 
-  const [selectedAnimes, setSelectedAnimes] = useState<MinAnimeData[]>([]);
+  const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
 
-  const { characters, isLoading, redo, animes } =
-    useGetCharactersToCharaAnime(animesAlreadyShowed);
+  const {
+    characters,
+    isLoading: isLoadingCharacters,
+    redo,
+    animes,
+  } = useGetCharactersToCharaAnime(animesAlreadyShowed);
 
   const initRound = () => {    
     redo();
     setCurrentPosition(0);
     setSelectedAnimes([]);
-    setStatus("stale");
+   
+    setTimeout(() => {
+      setStatus("stale");
+    }, 300);
   };
 
   const initGame = () => {
@@ -113,13 +126,14 @@ export function CharaAnimeProvider({
     setSelectedAnimes([]);
     setTotalPoints(0);
     setStatus("init");
+    setAnimesAlreadyShowed([]);
   };
 
   const addPoints = (points: number) => {
     setTotalPoints((prev) => prev + points);
   };
 
-  const addAnime = (anime: MinAnimeData) => {
+  const addAnime = (anime: SearchAnime) => {
     const newSelectedAnimes = [anime, ...selectedAnimes];
     setSelectedAnimes((prev) => [anime, ...prev]);
     if (
@@ -131,7 +145,7 @@ export function CharaAnimeProvider({
           anime.name.includes(a.name)
       )
     ) {
-      setAnimesAlreadyShowed((prev) => [...prev, ...animes.map((a) => a.id)]);
+      
       const points = 40 - 10 * (currentPosition - 1);
       addPoints(points);
       setRounds((prev) => [
@@ -147,7 +161,7 @@ export function CharaAnimeProvider({
       setStatus("win-round");
       return true;
     }
-    setStatus("error-round")
+    setStatus("error-round");
     return false;
   };
 
@@ -155,7 +169,9 @@ export function CharaAnimeProvider({
     setStatus("win");
   };
 
-  const nextRound = () => {
+  const nextRound = () => {    
+    setStatus("loading");
+    setAnimesAlreadyShowed((prev) => [...prev, ...animes.map((a) => a.id)]);
     if (totalRounds !== 0 && currentRound === totalRounds) {
       setStatus("end");
       return;
@@ -169,7 +185,7 @@ export function CharaAnimeProvider({
       value={{
         characters: characters ?? [],
         animes,
-        isLoading: isLoading,
+        isLoading: isLoading || isLoadingCharacters,
         status,
         setStatus,
         redo: initRound,
@@ -188,6 +204,9 @@ export function CharaAnimeProvider({
         currentPosition,
         setCurrentPosition,
         initGame,
+        numCharacters,
+        setNumCharacters,
+        selectedAnimes,
       }}
     >
       {children}
@@ -195,13 +214,16 @@ export function CharaAnimeProvider({
   );
 }
 
-export function useGetCharactersToCharaAnime(alreadyShowed: number[]) {
+export function useGetCharactersToCharaAnime(
+  alreadyShowed: number[]
+) {
   const { user } = usePageContext();
   const {
     anime,
     isLoading: isLoadingAnime,
     redo,
   } = useGetAndFormatRandomAnime(user);
+
   const { data: charactersData, isLoading } = useGetCharactersByAnimeIdMAL(
     anime?.idMal
   );
@@ -228,6 +250,7 @@ export function useGetCharactersToCharaAnime(alreadyShowed: number[]) {
         name: anime.title.romaji,
         englishName: anime.title.english,
       })) ?? [];
+
     setAnimesToReturn(animesToReturn);
   }, [animes]);
 

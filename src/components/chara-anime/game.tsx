@@ -3,13 +3,14 @@ import { useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
 import FlipCard from "./FlipCard";
 import { useState } from "react";
-import Image from "next/image";
 import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
-import { ArrowRight, ArrowRightAlt, RestartAlt } from "@mui/icons-material";
+import { ArrowRightAlt, RestartAlt } from "@mui/icons-material";
+import { SearchAnime } from "../game/context";
 
 export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
+
   return (
     <div className="flex flex-col gap-4 flex-1">
       <div>
@@ -21,7 +22,8 @@ export default function CharaAnimeGame() {
       {(status === "stale" ||
         status === "playing" ||
         status === "win-round" ||
-        status === "error-round") && <Playing />}
+        status === "error-round" ||
+        status === "loading") && <Playing />}
       {status === "end" && <End />}
     </div>
   );
@@ -59,6 +61,7 @@ function Init() {
 
 function Playing() {
   const { isLoading, addAnime, status } = useCharaAnimeContext();
+
   return (
     <div className="flex flex-col gap-4">
       <SearchAnimeSelect
@@ -67,14 +70,15 @@ function Playing() {
         className={`${
           status === "win-round"
             ? " outline-green-500 outline-2 disabled:outline-2"
-            : (status === "error-round"
-            ? " focus:outline-red-500 focus:outline-2 outline-red-500"
-            : undefined)
+            : status === "error-round"
+            ? "focus-within:outline-red-500 focus-within:outline-2 outline-red-500"
+            : undefined
         }`}
       />
       <Stats />
       <Round />
       <Controls />
+      <AnimesSelected />
     </div>
   );
 }
@@ -82,26 +86,29 @@ function Playing() {
 function Round() {
   const { characters, currentPosition, setCurrentPosition, status } =
     useCharaAnimeContext();
+
+  console.log({status})
+    
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
-        {characters.map((character, index) => (
-          <CardCharacter
-            key={index + "-" + character.character.malID}
-            characterData={character}
-            onClick={() => {
-              if (currentPosition === index) setCurrentPosition(index + 1);
-            }}
-            disabled={currentPosition !== index}
-            position={index}
-            flip={status === "win-round" ? true : undefined}
-          />
-        ))}
-        {Array(4 - characters.length)
-          .fill(0)
-          .map((_, index) => (
-            <CardCharacterSkeleton key={index} />
+        {status !== "loading" &&
+          characters.map((character, index) => (
+            <CardCharacter
+              key={index + "-" + character.character.malID}
+              characterData={character}
+              onClick={() => {
+                if (currentPosition === index) setCurrentPosition(index + 1);
+              }}
+              disabled={currentPosition !== index}
+              position={index}
+              flip={status === "win-round" ? true : undefined}
+            />
           ))}
+        {(status === "loading" || characters.length === 0) &&
+          Array(4)
+            .fill(0)
+            .map((_, index) => <CardCharacterSkeleton key={index} />)}
       </div>
     </div>
   );
@@ -121,7 +128,14 @@ function Stats() {
 }
 
 function Controls() {
-  const { nextRound, status, initGame } = useCharaAnimeContext();
+  const {
+    nextRound,
+    status,
+    initGame,
+    currentRound,
+    totalRounds,
+    currentPosition,
+  } = useCharaAnimeContext();
 
   return (
     <div className="flex gap-2 justify-between items-center">
@@ -129,10 +143,8 @@ function Controls() {
         className="bg-sky-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
         onClick={initGame}
       >
-        
         <RestartAlt />
-        <span className="hidden md:flex md:ml-2">Reiniciar</span> 
-        
+        <span className="hidden md:flex md:ml-2">Reiniciar</span>
       </button>
 
       {status === "win-round" && (
@@ -141,15 +153,22 @@ function Controls() {
       {status === "error-round" && (
         <span className="text-red-500 text-xl">¡Incorrecto! </span>
       )}
-
-      <button
-        onClick={nextRound}
-        disabled={status !== "win-round"}
-        className="flex bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
-      >
-       <span className="hidden md:flex md:mr-2">Siguiente ronda</span> 
-       <ArrowRightAlt />
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={nextRound}
+          disabled={status !== "win-round" && currentPosition !== 4}
+          className="flex bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+        >
+          <span className="hidden md:flex md:mr-2">
+            {currentRound === totalRounds
+              ? "Finalizar"
+              : status === "win-round"
+              ? "Siguiente"
+              : "Pasar"}
+          </span>
+          <ArrowRightAlt />
+        </button>
+      </div>
     </div>
   );
 }
@@ -218,7 +237,7 @@ function CardCharacter(props: CardCharacterProps) {
           <div
             className={`w-[150px] h-[280px] md:w-[225px] md:h-[350px] overflow-hidden rounded-md ${color} bg-slate-900`}
           >
-            <Image
+            <img
               alt="character"
               src={images.webp.image_url ?? images.jpg.image_url}
               width={201}
@@ -231,7 +250,7 @@ function CardCharacter(props: CardCharacterProps) {
           <div
             className={`w-[150px] h-[280px] md:w-[225px] md:h-[350px] rounded-md flex flex-col gap-2 justify-center items-center cursor-pointer ${color}`}
           >
-            <Image alt="card" src={"/logo-md.webp"} width={50} height={50} />
+            <img alt="card" src={"/logo-md.webp"} width={50} height={50} />
             <span className="uppercase text-xl font-mono font-bold">
               {points} puntos
             </span>
@@ -248,13 +267,48 @@ function CardCharacter(props: CardCharacterProps) {
 function CardCharacterSkeleton() {
   return (
     <div className="w-[225px] h-[350px] overflow-hidden rounded-md bg-slate-900 flex items-center justify-center">
-      <Image
+      <img
         alt="card"
         src={"/logo-md.webp"}
         width={50}
         height={50}
         className="animate-spin"
       />
+    </div>
+  );
+}
+
+function AnimesSelected() {
+  const { selectedAnimes } = useCharaAnimeContext();
+
+  return (
+    <div className="flex flex-col gap-2">
+      {selectedAnimes.map((selectedAnime) => (
+        <AnimeSelectedCard key={selectedAnime.name} anime={selectedAnime} />
+      ))}
+    </div>
+  );
+}
+
+interface AnimeSelectedCardProps {
+  anime: SearchAnime;
+}
+
+function AnimeSelectedCard(props: AnimeSelectedCardProps) {
+  const { animes } = useCharaAnimeContext();
+  const { anime } = props;
+  const isCorrect = animes.map((a) => a.id).includes(anime.id);
+
+  return (
+    <div
+      className={`flex gap-2 p-2 rounded-md ${
+        isCorrect ? "bg-green-700" : "bg-red-600"
+      }`}
+    >
+      <div>
+        <img src={anime.image} alt={anime.name} height={70} width={40} />
+      </div>
+      <div className="flex flex-1">{anime.name}</div>
     </div>
   );
 }

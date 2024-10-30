@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 export type FormatAnimesOptions = {
   types?: ListName[];
   tagsLimit?: number;
+  excludeAnimes?: number[];
 };
 
 const DEFAULT_OPTIONS = {
@@ -83,7 +84,11 @@ export function useGetAndFormatRandomAnime(
 
   useEffect(() => {
     const animes = formatAnimes(data, options);
-    const randomAnime = getRandomByArray(animes);
+    
+    const filteredAnimes = animes.filter((anime) => {
+      return !options?.excludeAnimes?.includes(anime.id) ;
+    });
+    const randomAnime = getRandomByArray(filteredAnimes);
     if (randomAnime) {
       setAnime(randomAnime);
     }

@@ -125,7 +125,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
           className={props.className}
         />
         <button
-          className={`absolute bottom-[2px] text-sm right-2 p-2 rounded-md bg-slate-900 text-white hover:bg-slate-800 ${
+          className={`absolute bottom-[2px] text-sm right-2 p-1 rounded-md bg-slate-900 text-white hover:bg-slate-800 ${
             (isOpen && search && !disabled) ? "" : "hidden"
           }`}
           onClick={() => {
