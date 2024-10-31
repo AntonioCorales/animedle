@@ -180,6 +180,99 @@ function Controls() {
   );
 }
 
+function precisionToClass(precision: number) {
+  if (precision <= 25) return "text-red-400";
+  if (precision <= 50) return "text-orange-400";
+  if (precision <= 75) return "text-yellow-400";
+  if (precision < 100) return "text-green-400";
+  return "text-sky-400";
+}
+
+function precisionToText(
+  precisionTries: number,
+  precisionPoints: number
+): string {
+  const getRandomMessage = (messages: string[]) =>
+    messages[Math.floor(Math.random() * messages.length)];
+
+  const precisionPointsMessages = {
+    0: [
+      "Ni fallando apropósito lo hubiera hecho tan mal...",
+      "¿Jugaste con los ojos cerrados?",
+      "Increíble... pero no en el buen sentido.",
+      "¿Estás seguro de que sabes cómo se juega?",
+      "Tienes un talento especial... para fallar.",
+      "Lo siento, pero esto es épico... en el mal sentido.",
+    ],
+    25: [
+      "Si no lo hiciste apropósito... no lo entiendo",
+      "¿A eso le llamas intentarlo?",
+      "La próxima vez puedes intentar con un poco más de ganas.",
+      "Estás cerca de no hacer nada, ¡intenta más fuerte!",
+      "Apenas y lo intentaste... o eso parece.",
+      "¿Un esfuerzo mínimo? ¡Inténtalo en serio!",
+      "Este juego necesita que enciendas la pantalla.",
+    ],
+    50: [
+      "¡¿Cómo sacaste tan pocos puntos?!",
+      "Con algo más de empeño seguro fallas más.",
+      "No está mal… para haber jugado ciego.",
+      "Si le pones algo más de ganas seguro subes.",
+      "La mitad del camino... ¡Para llegar a un nivel normal!",
+      "¿Te estabas tomando un descanso?",
+    ],
+    75: [
+      "Igual no esperaba mucho...",
+      "Te falta poquito... ¡Pero para caer!",
+      "No es mal resultado, pero Pingu te gana.",
+      "A medio camino entre bien y el caer en pozo.",
+      "¡Vas bien!, pero te falta un poco de neuronas.",
+      "¿Ya estás cansado?... Porque se esta notando",
+      '"Hasta los fans de Dragon Ball saben mas." -Ahunae',
+    ],
+    90: [
+      "¡Bueno, pero no tanto!",
+      "¡Casi lo logras! Ahora intenta usar el resto del cerebro.",
+      "Pues ni tan mal, no pense que llegarías a tanto.",
+      "Estás muy cerca... ¿Y si lo intentas otra vez?",
+      '"Muy bien, pero el chat lo haría mejor." -endertroll',
+    ],
+    100: [
+      "¡¡GOOOOOD!!",
+      "Perfección casi lograda, ¡JEJE GOD!",
+      "¿Tus habilidades ya están al límite?",
+      "Estoy sinceramente impresionado.",
+      "Casi inmejorable, pero Goku te gana.",
+    ],
+  };
+
+  const precisionTriesMessages = {
+    true: [
+      "¡¡ERES DIOS, ¿¿PERO TANTO ESFUERZO VALIÓ LA PENA??!!",
+      '"Ya era hora que hicieseis todo bien, no cuesta tanto." -Rodri',
+      "Increíble! Lo alcanzaste, ¿Cuantas neuronas sacrificaste?",
+    ],
+    false: [
+      "NADA, ERES BUENÍSIMO. ¿PERO LA PRECISIÓN PARA CUANDO?",
+      "¡No te lo crees ni tú!, ¿pero la precisión te la sabes?!",
+      '"Los segundos son los primeros perdedores." -Rodri',
+    ],
+  };
+
+  if (precisionPoints === 100) {
+    const isSuccess: "true" | "false" =
+      precisionTries === 100 ? "true" : "false";
+    return getRandomMessage(precisionTriesMessages[isSuccess]);
+  }
+
+  type Range = 0 | 25 | 50 | 75 | 90 | 100;
+
+  const ranges: Range[] = [0, 25, 50, 75, 90, 100];
+  const range = ranges.find((r) => precisionPoints <= r) || 100;
+
+  return getRandomMessage(precisionPointsMessages[range]);
+}
+
 function End() {
   const { totalPoints, rounds, totalRounds, initGame } = useCharaAnimeContext();
   const totalTries = rounds.reduce(
@@ -189,50 +282,21 @@ function End() {
   const maxPoints = totalRounds * 40;
   const precision =
     totalTries === 0 ? 0 : Math.round((totalRounds / totalTries) * 1000) / 10;
-  const textClass =
-    precision <= 25
-      ? "text-red-400"
-      : precision <= 50
-      ? "text-orange-400"
-      : precision <= 75
-      ? "text-yellow-400"
-      : "text-green-400";
+  const textClass = precisionToClass(precision);
 
   const pointsPercent = Math.round((totalPoints / maxPoints) * 1000) / 10;
-  const pointsClass =
-    pointsPercent <= 25
-      ? "text-red-400"
-      : pointsPercent <= 50
-      ? "text-orange-400"
-      : pointsPercent <= 75
-      ? "text-yellow-400"
-      : "text-green-400";
+  const pointsClass = precisionToClass(pointsPercent);
 
-  const pointsText =
-    pointsPercent <= 10
-      ? "Si no lo hiciste apropósito... no lo entiendo"
-      : pointsPercent <= 25
-      ? "¡¿Cómo sacaste tan pocos puntos?!"
-      : pointsPercent <= 50
-      ? "Igual no esperaba nada..."
-      : pointsPercent <= 75
-      ? "¡Bueno, pero no tanto!"
-      : pointsPercent <= 90
-      ? "¡¿Como llegaste tan lejos?!"
-      : pointsPercent < 100
-      ? "¡¡GOOOOOD!!"
-      : precision < 100
-      ? "¡¡NADA, ERES DIOS. ¿¿PERO LA PRECISION PARA CUANDO??!!"
-      : "¡¡TANTO ESFUERZO, PARA ESTO ¿¿VALIO LA PENA??!!";
+  const pointsText = precisionToText(precision, pointsPercent);
 
   return (
     <div className="flex flex-col gap-3 justify-center items-center pb-64 flex-1">
       {pointsPercent > 25 && <WinComponent />}
 
-      <span className={"text-2xl leading-5"}>{"¡Finalizado!"}</span>
-      <span className={"text-lg " + pointsClass}>{pointsText}</span>
+      <span className={"text-2xl"}>{"¡Finalizado!"}</span>
+      <span className={"text-lg uppercase leading-5 " + pointsClass}>{pointsText}</span>
       {maxPoints === totalPoints && totalTries === totalRounds && (
-        <span className="text-xl text-sky-400">¡Puntuación perfecta!</span>
+        <span className="text-lg text-sky-400">¡Puntuación perfecta!</span>
       )}
       <span>
         Has obtenido {totalPoints} de {maxPoints} puntos
@@ -240,7 +304,7 @@ function End() {
       <div className="flex flex-col text-center ">
         <span className={`text-2xl ${textClass} relative leading-5`}>
           {precision}
-          <span className="text-xs absolute right bottom-0">%</span>
+          <span className="text-xs">%</span>
         </span>
         <span className="text-sm">precisión</span>
       </div>
