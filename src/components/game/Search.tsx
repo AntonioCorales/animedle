@@ -25,6 +25,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [disabledA, setDisabled] = useState(false);
 
   const filteredAnimes = useFilteredAnimes(excludeAnimes ?? [], animes, search);
 
@@ -34,9 +35,10 @@ export default function SearchAnimeSelect(props: SearchProps) {
 
   const handleSelect = useCallback(
     (anime: SearchAnime) => {
+      if(!search) return;
+      setIsOpen(false);
       onSelect?.(anime);
       setSearch("");
-      setIsOpen(false);
       if (ref.current) {
         const inputElement = ref.current?.querySelector(
           "input"
@@ -44,7 +46,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
         inputElement?.focus();
       }
     },
-    [onSelect]
+    [onSelect, search]
   );
 
   useEffect(() => {

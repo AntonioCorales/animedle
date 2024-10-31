@@ -275,14 +275,14 @@ function precisionToText(
 }
 
 function End() {
-  const { totalPoints, rounds, totalRounds, initGame } = useCharaAnimeContext();
+  const { totalPoints, rounds, totalRounds, initGame, numCorrects } = useCharaAnimeContext();
   const totalTries = rounds.reduce(
-    (prev, curr) => prev + curr.selectedAnimes.length,
+    (prev, curr) => prev + (curr.selectedAnimes.length === 0 ? 1 : curr.selectedAnimes.length),
     0
   );
   const maxPoints = totalRounds * 40;
   const precision =
-    totalTries === 0 ? 0 : Math.round((totalRounds / totalTries) * 1000) / 10;
+    totalTries === 0 ? 0 : Math.round((numCorrects / totalTries) * 1000) / 10;
   const textClass = precisionToClass(precision);
 
   const pointsPercent = Math.round((totalPoints / maxPoints) * 1000) / 10;

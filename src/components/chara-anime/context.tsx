@@ -55,6 +55,7 @@ export type CharaAnimeContext = {
   numCharacters: number;
   setNumCharacters: (position: number) => void;
   selectedAnimes: SearchAnime[];
+  numCorrects: number;
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -82,6 +83,7 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   numCharacters: 0,
   setNumCharacters: () => {},
   selectedAnimes: [],
+  numCorrects: 0,
 });
 
 export function CharaAnimeProvider({
@@ -98,9 +100,10 @@ export function CharaAnimeProvider({
   const [animesAlreadyShowed, setAnimesAlreadyShowed] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [numCharacters, setNumCharacters] = useState(4);
+  const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
-  const [currentPosition, setCurrentPosition] = useState<number>(0);
+  const [currentPosition, setCurrentPosition] = useState<number>(0); 
 
   const {
     characters,
@@ -108,15 +111,19 @@ export function CharaAnimeProvider({
     redo,
     animes,
   } = useGetCharactersToCharaAnime(animesAlreadyShowed);
+  console.log({animes, selectedAnimes, characters})
 
   const initRound = () => {
     redo();
     setCurrentPosition(0);
     setSelectedAnimes([]);
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setStatus("stale");
     }, 300);
+    
+    return ()=> clearTimeout(timeout)
+
   };
 
   const initGame = () => {
@@ -127,6 +134,7 @@ export function CharaAnimeProvider({
     setTotalPoints(0);
     setStatus("init");
     setAnimesAlreadyShowed([]);
+    setNumCorrects(0);
   };
 
   const addPoints = (points: number) => {
@@ -145,6 +153,7 @@ export function CharaAnimeProvider({
           anime.name.includes(a.name)
       )
     ) {
+      setNumCorrects((prev) => prev + 1);
       const points = 40 - 10 * (currentPosition - 1);
       addPoints(points);
       setRounds((prev) => [
@@ -169,6 +178,17 @@ export function CharaAnimeProvider({
   };
 
   const nextRound = () => {
+    if(!selectedAnimes.length && currentRound > 0) {
+      setRounds((prev)=> [
+        ...prev,
+        {
+          animes,
+          characters,
+          points: 0,
+          selectedAnimes: []
+        }
+      ])
+    }
     setStatus("loading");
     setAnimesAlreadyShowed((prev) => [...prev, ...animes.map((a) => a.id)]);
     if (totalRounds !== 0 && currentRound === totalRounds) {
@@ -206,6 +226,7 @@ export function CharaAnimeProvider({
         numCharacters,
         setNumCharacters,
         selectedAnimes,
+        numCorrects,
       }}
     >
       {children}
