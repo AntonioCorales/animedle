@@ -199,7 +199,7 @@ function precisionToText(
     0: [
       "Ni fallando apropósito lo hubiera hecho tan mal...",
       "¿Jugaste con los ojos cerrados?",
-      "Increíble... pero no en el buen sentido.",
+      '"Eres Manco como Yair17" -henry__0408',
       "¿Estás seguro de que sabes cómo se juega?",
       "Tienes un talento especial... para fallar.",
       "Lo siento, pero esto es épico... en el mal sentido.",
@@ -235,7 +235,7 @@ function precisionToText(
       "¡Casi lo logras! Ahora intenta usar el resto del cerebro.",
       "Pues ni tan mal, no pense que llegarías a tanto.",
       "Estás muy cerca... ¿Y si lo intentas otra vez?",
-      '"Muy bien, pero el chat lo haría mejor." -endertroll',
+      '"Muy bien, pero el chat lo haría mejor." -endertroll12345_original',
     ],
     100: [
       "¡¡GOOOOOD!!",
@@ -249,13 +249,13 @@ function precisionToText(
   const precisionTriesMessages = {
     true: [
       "¡¡ERES DIOS, ¿¿PERO TANTO ESFUERZO VALIÓ LA PENA??!!",
-      '"Ya era hora que hicieseis todo bien, no cuesta tanto." -Rodri',
+      '"Ya era hora que hicieseis todo bien, no cuesta tanto." -Rodri12721',
       "Increíble! Lo alcanzaste, ¿Cuantas neuronas sacrificaste?",
     ],
     false: [
       "NADA, ERES BUENÍSIMO. ¿PERO LA PRECISIÓN PARA CUANDO?",
       "¡No te lo crees ni tú!, ¿pero la precisión te la sabes?!",
-      '"Los segundos son los primeros perdedores." -Rodri',
+      '"Los segundos son los primeros perdedores." -Rodri12721',
     ],
   };
 
@@ -263,12 +263,13 @@ function precisionToText(
     const isSuccess: "true" | "false" =
       precisionTries === 100 ? "true" : "false";
     return getRandomMessage(precisionTriesMessages[isSuccess]);
+
   }
 
   type Range = 0 | 25 | 50 | 75 | 90 | 100;
 
   const ranges: Range[] = [0, 25, 50, 75, 90, 100];
-  const range = ranges.find((r) => precisionPoints <= r) || 100;
+  const range = ranges.find((r) => precisionPoints <= r) ?? 100;
 
   return getRandomMessage(precisionPointsMessages[range]);
 }
@@ -294,7 +295,9 @@ function End() {
       {pointsPercent > 25 && <WinComponent />}
 
       <span className={"text-2xl"}>{"¡Finalizado!"}</span>
-      <span className={"text-lg uppercase leading-5 " + pointsClass}>{pointsText}</span>
+      <span className={"text-lg uppercase leading-5 " + pointsClass}>
+        {pointsText}
+      </span>
       {maxPoints === totalPoints && totalTries === totalRounds && (
         <span className="text-lg text-sky-400">¡Puntuación perfecta!</span>
       )}
