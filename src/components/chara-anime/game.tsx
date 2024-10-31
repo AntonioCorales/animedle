@@ -219,7 +219,11 @@ function End() {
       ? "¡Bueno, pero no tanto!"
       : pointsPercent <= 90
       ? "¡¿Como llegaste tan lejos?!"
-      : "¡¡GOOOOOD!!";
+      : pointsPercent < 100
+      ? "¡¡GOOOOOD!!"
+      : precision < 100
+      ? "¡¡NADA, ERES DIOS. ¿¿PERO LA PRECISION PARA CUANDO??!!"
+      : "¡¡TANTO ESFUERZO, PARA ESTO ¿¿VALIO LA PENA??!!";
 
   return (
     <div className="flex flex-col gap-3 justify-center items-center pb-64 flex-1">
@@ -400,4 +404,4 @@ const CardAnimationPuseStyles = styled.div`
       transform: scale(1);
     }
   }
-`
+`;
