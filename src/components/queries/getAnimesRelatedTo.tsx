@@ -115,10 +115,8 @@ export function useGetAnimesRelatedToAL(animeId?: number) {
         }),
       });
       const { data } = (await response.json()) as AnimeRelatedResponseAL;
-      console.log({data})
       const { Media } = data;
       const flattenMediaList = flattenMedia(Media, animeId);
-      console.log(flattenMediaList);
       return flattenMediaList;
     },
     enabled: !!animeId,

@@ -111,7 +111,6 @@ export function CharaAnimeProvider({
     redo,
     animes,
   } = useGetCharactersToCharaAnime(animesAlreadyShowed);
-  console.log({animes, selectedAnimes, characters})
 
   const initRound = () => {
     redo();
