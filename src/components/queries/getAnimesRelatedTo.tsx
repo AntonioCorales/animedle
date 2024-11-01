@@ -20,26 +20,81 @@ export function useGetAnimesRelatedToMAL(animeId?: number) {
 
 const animesRelatedToQuery = `
   query Media($mediaId: Int) {
-  Media(id: $mediaId) {
+  Media(id: $mediaId) {    
+    id
+    idMal
+    synonyms
     title {
       romaji
       english
     }
-    id
-    idMal
     relations {
       nodes {
         id
         idMal
+        synonyms
         title {
           romaji
           english
+        }
+        relations {
+          nodes {
+            id
+            idMal
+            synonyms
+            title {
+              romaji
+              english
+            }
+          }
         }
       }
     }
   }
 }
 `;
+
+const ListExcludesRelations = [104454, 110178, 117074]
+
+function flattenMedia(data: Media, idAnime?: number): Media[] {
+  const uniqueMediaMap = new Map<number, Media>();
+  const mainIsExclude = idAnime ? ListExcludesRelations.includes(idAnime) : false;
+  let depth = 0;
+
+  function traverseNodes(nodes?: Media[]) {
+    if(!nodes) return;
+    nodes.forEach(node => {
+      const media: Media = {
+        title: {
+          romaji: node.title.romaji,
+          english: node.title.english || null
+        },
+        id: node.id,
+        idMal: node.idMal
+      };
+
+      // Agregar a uniqueMediaMap solo si no existe con el mismo `id`
+      if (!uniqueMediaMap.has(media.id)) {
+        uniqueMediaMap.set(media.id, media);
+      }
+
+      // Recursividad para nodos relacionados
+      if (node.relations && node.relations.nodes) {
+        const nodeIsExclude = ListExcludesRelations.includes(node.id);
+        if(depth > 0 && !mainIsExclude && nodeIsExclude) return;
+        traverseNodes(node.relations.nodes);
+      }
+
+      depth++;
+    });
+  }
+
+  // Iniciar el recorrido de la lista principal de nodos
+  traverseNodes(data.relations?.nodes);
+
+  // Convertir el Map a un array
+  return Array.from(uniqueMediaMap.values());
+}
 
 export function useGetAnimesRelatedToAL(animeId?: number) {
   return useQuery<Media[]>({
@@ -60,13 +115,11 @@ export function useGetAnimesRelatedToAL(animeId?: number) {
         }),
       });
       const { data } = (await response.json()) as AnimeRelatedResponseAL;
+      console.log({data})
       const { Media } = data;
-      const { relations, ...rest } = Media;
-      const toReturn: Media[] = [{ ...rest }];
-      if (relations?.nodes) {
-        toReturn.push(...relations.nodes);
-      }
-      return toReturn;
+      const flattenMediaList = flattenMedia(Media, animeId);
+      console.log(flattenMediaList);
+      return flattenMediaList;
     },
     enabled: !!animeId,
     refetchOnWindowFocus: false,
