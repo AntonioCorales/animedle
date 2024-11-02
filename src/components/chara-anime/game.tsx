@@ -199,7 +199,6 @@ function precisionToText(
     0: [
       "Ni fallando apropósito lo hubiera hecho tan mal...",
       "¿Jugaste con los ojos cerrados?",
-      '"Eres Manco como Yair17" -henry__0408',
       "¿Estás seguro de que sabes cómo se juega?",
       "Tienes un talento especial... para fallar.",
       "Lo siento, pero esto es épico... en el mal sentido.",
@@ -212,6 +211,7 @@ function precisionToText(
       "Apenas y lo intentaste... o eso parece.",
       "¿Un esfuerzo mínimo? ¡Inténtalo en serio!",
       "Este juego necesita que enciendas la pantalla.",
+      '"Eres Manco, como Yair17" -henry__0408',
     ],
     50: [
       "¡¿Cómo sacaste tan pocos puntos?!",

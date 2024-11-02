@@ -103,7 +103,9 @@ export function CharaAnimeProvider({
   const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
-  const [currentPosition, setCurrentPosition] = useState<number>(0); 
+  const [currentPosition, setCurrentPosition] = useState<number>(0);
+
+  console.log({animesAlreadyShowed})
 
   const {
     characters,
@@ -120,9 +122,8 @@ export function CharaAnimeProvider({
     const timeout = setTimeout(() => {
       setStatus("stale");
     }, 300);
-    
-    return ()=> clearTimeout(timeout)
 
+    return () => clearTimeout(timeout);
   };
 
   const initGame = () => {
@@ -177,16 +178,16 @@ export function CharaAnimeProvider({
   };
 
   const nextRound = () => {
-    if(!selectedAnimes.length && currentRound > 0) {
-      setRounds((prev)=> [
+    if (!selectedAnimes.length && currentRound > 0) {
+      setRounds((prev) => [
         ...prev,
         {
           animes,
           characters,
           points: 0,
-          selectedAnimes: []
-        }
-      ])
+          selectedAnimes: [],
+        },
+      ]);
     }
     setStatus("loading");
     setAnimesAlreadyShowed((prev) => [...prev, ...animes.map((a) => a.id)]);
@@ -239,7 +240,7 @@ export function useGetCharactersToCharaAnime(alreadyShowed: number[]) {
     anime,
     isLoading: isLoadingAnime,
     redo,
-  } = useGetAndFormatRandomAnime(user);
+  } = useGetAndFormatRandomAnime(user, alreadyShowed);
 
   const { data: charactersData, isLoading } = useGetCharactersByAnimeIdMAL(
     anime?.idMal

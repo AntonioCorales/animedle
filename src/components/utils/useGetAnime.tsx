@@ -76,6 +76,7 @@ export function useGetAndFormatAnimes(
 
 export function useGetAndFormatRandomAnime(
   user: string,
+  excludeAnimes?: number[],
   options?: FormatAnimesOptions
 ) {
   const { data, isLoading } = useGetAnimeByUser(user);
@@ -83,16 +84,16 @@ export function useGetAndFormatRandomAnime(
   const [anime, setAnime] = useState<SearchAnime>();
 
   useEffect(() => {
-    const animes = formatAnimes(data, options);
+    const animes = formatAnimes(data);
     
     const filteredAnimes = animes.filter((anime) => {
-      return !options?.excludeAnimes?.includes(anime.id) ;
+      return !(excludeAnimes?.includes(anime.id) ?? false);
     });
     const randomAnime = getRandomByArray(filteredAnimes);
     if (randomAnime) {
       setAnime(randomAnime);
     }
-  }, [data, options]);
+  }, [data, excludeAnimes]);
 
   const redo = () => {
     const animes = formatAnimes(data, options);
