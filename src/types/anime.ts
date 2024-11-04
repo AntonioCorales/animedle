@@ -44,7 +44,16 @@ export type Media = {
   season: string;
   format: string;
   synonyms: string[];
+  studios: {
+    nodes: NodesStudio[];
+  }
 };
+
+export type NodesStudio = {
+  id: number;
+  name: string;
+  isAnimationStudio: boolean;
+}
 
 export type CoverImage = {
   extraLarge: string;

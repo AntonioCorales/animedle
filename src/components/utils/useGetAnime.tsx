@@ -1,4 +1,4 @@
-import { ListName, MediaListCollection } from "@/types/anime";
+import { ListName, MediaListCollection, NodesStudio } from "@/types/anime";
 import { SearchAnime } from "../game/context";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { getRandomByArray } from "./functions";
@@ -43,6 +43,16 @@ export function formatAnimes(
         ? media.tags.map((tag) => tag.name).slice(0, tagsLimit)
         : media.tags.map((tag) => tag.name);
 
+    const studios: NodesStudio[] = []
+    media.studios.nodes.forEach((studio) => {
+      if (studio.isAnimationStudio) {
+        if(studios.findIndex((s) => s.id === studio.id) === -1) {
+          studios.push(studio);
+        }
+      }
+    });
+
+
     return {
       id: media.id,
       idMal: media.idMal,
@@ -57,6 +67,7 @@ export function formatAnimes(
       format: media.format,
       season: media.season,
       description: media.description,
+      studios
     };
   });
 }

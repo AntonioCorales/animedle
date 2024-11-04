@@ -18,6 +18,13 @@ export type SearchAnime = {
   season: string;
   format: string;
   description?: string | null;
+  studios: Studio[];
+};
+
+type Studio = {
+  id: number;
+  name: string;
+  isAnimationStudio: boolean;
 };
 
 type GameState = "stale" | "play" | "win";
@@ -79,6 +86,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     const animes = formatAnimes(data, {tagsLimit: 4, types: ["Completed"]});
+    console.log(animes);
     setAnimes(animes);
     setAnime(getRandomByArray(animes));
   }, [data]);

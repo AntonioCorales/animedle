@@ -32,6 +32,13 @@ const queryAnimeByUser = `query Query($userName: String, $type: MediaType) {
           tags {
             name
           }
+          studios {
+            nodes {
+              id
+              name
+              isAnimationStudio
+            }
+          }
         }
       }
       

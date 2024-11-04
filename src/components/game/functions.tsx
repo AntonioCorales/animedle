@@ -68,7 +68,7 @@ export function useCompareTags(tags: string[]) {
   };
 }
 
-export function useCompareYear(year: number) {
+export function useCompareYearAndSeason(year: number, season: string) {
   const { anime } = useGameContext();
 
   const [response, setResponse] = useState<Responses>("missing");
@@ -76,13 +76,18 @@ export function useCompareYear(year: number) {
   useEffect(() => {
     if (anime) {
       const yearMatch = anime.seasonYear === year;
-      if (yearMatch) {
+      const seasonMatch = anime.season === season;
+      if (yearMatch && seasonMatch) {
         setResponse("success");
+        return;
+      }
+      if (yearMatch && !seasonMatch) {
+        setResponse("missing");
         return;
       }
       setResponse("error");
     }
-  }, [anime, year]);
+  }, [anime, year, season]);
 
   return {
     position: !anime?.seasonYear || anime.seasonYear === year ? "none" : year > anime.seasonYear ? "down" : "up",
@@ -136,21 +141,32 @@ export function useCompareFormat(format: string) {
   };
 }
 
-export function useCompareSeason(season: string) {
+export function useCompareStudio(studiosId: number[]) {
   const { anime } = useGameContext();
 
   const [response, setResponse] = useState<Responses>("missing");
 
   useEffect(() => {
     if (anime) {
-      const seasonMatch = anime.season === season;
-      if (seasonMatch) {
-        setResponse("success");
+      const seasonMatch = anime.studios.every((studio) =>
+        studiosId.includes(studio.id)
+      );
+      if (seasonMatch && anime.studios.length === studiosId.length) {
+        setResponse("success"); 
         return;
       }
+
+      const studioSomeMatch = anime.studios.some((studio) =>
+        studiosId.includes(studio.id)
+      );
+      if (studioSomeMatch) {
+        setResponse("missing");
+        return;
+      }
+
       setResponse("error");
     }
-  }, [anime, season]);
+  }, [anime, studiosId]);
 
   return {
     response,

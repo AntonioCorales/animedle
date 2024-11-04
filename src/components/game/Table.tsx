@@ -11,12 +11,13 @@ import {
   useCompareEpisodes,
   useCompareFormat,
   useCompareGenres,
-  useCompareSeason,
+  useCompareStudio,
   useCompareTags,
-  useCompareYear,
+  useCompareYearAndSeason,
 } from "./functions";
 import { ArrowUpward } from "@mui/icons-material";
 import ReactCardFlip from "react-card-flip";
+import { NodesStudio } from "@/types/anime";
 
 export default function Table() {
   const { selectedAnimes } = useGameContext();
@@ -30,8 +31,8 @@ export default function Table() {
             <th className="text-center">Géneros</th>
             <th className="text-center">Etiquetas</th>
             <th className="text-center">Capítulos</th>
-            <th className="text-center">Año</th>
-            <th className="text-center">Temporada</th>
+            <th className="text-center">Año y Temporada</th>
+            <th className="text-center">Estudio</th>
             <th className="text-center">Formato</th>
           </tr>
         </thead>
@@ -76,11 +77,15 @@ function TableItem(
       </td>
 
       <GenresStyles genres={anime.genres} delay={delayStep * 0} />
-      <TagsStyles tags={anime.tags} delay={delayStep * 1}/>
-      <EpisodesStyles episodes={anime.episodes} delay={delayStep * 2}/>
-      <YearStyles year={anime.seasonYear} delay={delayStep * 3}/>
-      <SeasonStyles season={anime.season} delay={delayStep * 4}/>
-      <FormatStyles format={anime.format} delay={delayStep * 5}/>
+      <TagsStyles tags={anime.tags} delay={delayStep * 1} />
+      <EpisodesStyles episodes={anime.episodes} delay={delayStep * 2} />
+      <YearStyles
+        year={anime.seasonYear}
+        season={anime.season}
+        delay={delayStep * 3}
+      />
+      <StudioStyles studios={anime.studios} delay={delayStep * 4} />
+      <FormatStyles format={anime.format} delay={delayStep * 5} />
     </tr>
   );
 }
@@ -90,7 +95,11 @@ function GenresStyles(props: { genres: string[] } & { delay?: number }) {
   const { response, responseColor } = useCompareGenres(genres);
 
   const genresIntl = new Intl.ListFormat().format(genres);
-  return <CardStyles className={responseColor} delay={delay}>{genresIntl}</CardStyles>;
+  return (
+    <CardStyles className={responseColor} delay={delay}>
+      {genresIntl}
+    </CardStyles>
+  );
 }
 
 function TagsStyles(props: { tags: string[] } & { delay?: number }) {
@@ -98,18 +107,30 @@ function TagsStyles(props: { tags: string[] } & { delay?: number }) {
   const { response, responseColor } = useCompareTags(tags);
 
   const tagsIntl = new Intl.ListFormat().format(tags);
-  return <CardStyles className={responseColor} delay={delay}>{tagsIntl}</CardStyles>;
-}
-
-function YearStyles(props: { year: number } & { delay?: number }) {
-  const { year, delay } = props;
-  const { response, responseColor, position } = useCompareYear(year);
-
   return (
     <CardStyles className={responseColor} delay={delay}>
-      {year}
-      {position === "up" && <ArrowUpward />}
-      {position === "down" && <ArrowUpward className="rotate-180" />}
+      {tagsIntl}
+    </CardStyles>
+  );
+}
+
+function YearStyles(
+  props: { year: number; season: string } & { delay?: number }
+) {
+  const { year, delay, season } = props;
+  const { response, responseColor, position } = useCompareYearAndSeason(
+    year,
+    season
+  );
+
+  return (
+    <CardStyles className={responseColor + " flex flex-col"} delay={delay}>
+      <div className="flex gap-1">
+        {year}
+        {position === "up" && <ArrowUpward />}
+        {position === "down" && <ArrowUpward className="rotate-180" />}
+      </div>
+      <div className="uppercase">{season}</div>
     </CardStyles>
   );
 }
@@ -152,7 +173,7 @@ function CardStyles(
     <td {...props} className={" h-full min-w-[100px] rounded-md"} ref={ref}>
       <ReactCardFlip
         flipDirection="vertical"
-        isFlipped={flipped}        
+        isFlipped={flipped}
         containerStyle={{
           display: "flex",
           width: "100%",
@@ -160,13 +181,14 @@ function CardStyles(
         }}
       >
         <div
+          className={"w-full h-full flex items-center justify-center p-2"}
+        ></div>
+        <div
           className={
-            "w-full h-full flex items-center justify-center p-2"
+            "w-full h-full flex items-center justify-center p-2 text-center rounded-md " +
+            props.className
           }
         >
-          
-        </div>
-        <div className={"w-full h-full flex items-center justify-center p-2 text-center rounded-md " + props.className}>
           {props.children}
         </div>
       </ReactCardFlip>
@@ -178,12 +200,20 @@ function FormatStyles(props: { format: string } & { delay?: number }) {
   const { format, delay } = props;
   const { response, responseColor } = useCompareFormat(format);
 
-  return <CardStyles className={responseColor} delay={delay}>{format}</CardStyles>;
+  return (
+    <CardStyles className={responseColor} delay={delay}>
+      {format}
+    </CardStyles>
+  );
 }
 
-function SeasonStyles(props: { season: string } & { delay?: number }) {
-  const { season, delay } = props;
-  const { response, responseColor } = useCompareSeason(season);
+function StudioStyles(props: { studios: NodesStudio[] } & { delay?: number }) {
+  const { studios, delay } = props;
+  const { response, responseColor } = useCompareStudio(studios.map((studio) => studio.id));
 
-  return <CardStyles className={responseColor} delay={delay}>{season}</CardStyles>;
+  return (
+    <CardStyles className={responseColor} delay={delay}>
+      {new Intl.ListFormat().format(studios.map((studio) => studio.name))}
+    </CardStyles>
+  );
 }
