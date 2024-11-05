@@ -27,7 +27,7 @@ export default function AniQuizGame() {
 
 function Quiz() {
   const { quiz, nextQuiz, restartGame, isLoading } = useAniQuizContext();
-  const { reset } = useCounterContext();
+  const { restart } = useCounterContext();
   return (
     <>
       {!isLoading && quiz ? (
@@ -45,16 +45,16 @@ function Quiz() {
               onClick={restartGame}
               className="bg-blue-500 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
             >
-              Restart
+              Reiniciar
             </button>
             <button
               className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
               onClick={() => {
-                reset();
+                restart();
                 nextQuiz();
               }}
             >
-              Next
+              Siguiente
             </button>
           </div>
         </div>
@@ -70,8 +70,7 @@ function Quiz() {
 function Option(props: { option: SearchAnime }) {
   const { option } = props;
   const { status, quiz, onSelectOption, selectedOption } = useAniQuizContext();
-  const { setState } = useCounterContext();
-  const { counter } = useCounterContext();
+  const { counter, setState } = useCounterContext();
 
   const classes =
     status !== "playing"
@@ -122,7 +121,13 @@ function TimerBar() {
   } = useAniQuizContext();
   const { counter, setState } = useCounterContext();
 
-  setState("play");
+  useEffect(() => {
+    if (status !== "playing") {
+      setState("pause");
+      return;
+    }
+    setState("play");
+  }, [status, setState]);
 
   const statusTimeBar =
     counter <= thinkingTime
@@ -130,32 +135,30 @@ function TimerBar() {
       : counter > answeredTime
       ? status
       : "answered";
-  const percent =
-    statusTimeBar === "thinking"
-      ? counter / thinkingTime
-      : (answeredTime - counter + thinkingTime) / answeredTime;
+  // const percent = 
+  //   statusTimeBar === "thinking"
+  //     ? counter / thinkingTime
+  //     : (answeredTime - counter + thinkingTime) / answeredTime;
+
+  const percent = 1 - counter / (answeredTime + thinkingTime);
+  
 
   const classByPercent =
-    statusTimeBar === "thinking"
-      ? "bg-sky-400"
-      : percent > 0.75
+      counter > 15
+      ? "bg-red-400"
+      : counter > 10
+      ? "bg-yellow-400":
+      counter > 5
       ? "bg-green-400"
-      : percent > 0.25
-      ? "bg-yellow-400"
-      : "bg-red-400";
+      : "bg-sky-400";
 
-  const borderByPercent =
-    statusTimeBar === "thinking"
-      ? "border-sky-400"
-      : percent > 0.75
-      ? "border-green-400"
-      : percent > 0.25
-      ? "border-yellow-400"
-      : "border-red-400";
-
-  useEffect(() => {
-    if (status !== "playing") setState("pause");
-  }, [status, setState]);
+  const borderByPercent = counter > 15 
+    ? "border-red-400"
+    : counter > 10
+    ? "border-yellow-400"
+    : counter > 5
+    ? "border-green-400"
+    : "border-sky-400";
 
   return (
     <div className="flex flex-col gap-1">
@@ -175,7 +178,7 @@ function TimerBar() {
       </div>
       <div className="flex gap-2 justify-between items-center">
         <span>
-          {currentQuiz}/{totalQuiz}
+          Ronda: {currentQuiz}/{totalQuiz}
         </span>
         <span className="text-sky-400">Puntos: {totalPoints}</span>
       </div>

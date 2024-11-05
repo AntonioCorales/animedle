@@ -5,6 +5,7 @@ type CounterContextType = {
   state: "play" | "pause";
   setState: (state: "play" | "pause") => void;
   reset: () => void;
+  restart: () => void;
 };
 
 const CounterContext = createContext<CounterContextType>({
@@ -12,6 +13,7 @@ const CounterContext = createContext<CounterContextType>({
   state: "play",
   setState: () => {},
   reset: () => {},
+  restart: () => {},
 });
 
 export function CounterProvider({ children }: React.PropsWithChildren) {
@@ -32,6 +34,11 @@ export function CounterProvider({ children }: React.PropsWithChildren) {
     setCounter(0);
   };  
 
+  const restart = () => {
+    setState("play");
+    setCounter(0);
+  };
+
   return (
     <CounterContext.Provider
       value={{
@@ -39,6 +46,7 @@ export function CounterProvider({ children }: React.PropsWithChildren) {
         state,
         setState,
         reset,
+        restart,
       }}
     >
       {children}

@@ -128,14 +128,14 @@ export const AniQuizProvider = ({
     redo();
   };
 
-  const onSelectOption = (option: SearchAnime, time: number) => {  
+  const onSelectOption = (option: SearchAnime, time: number) => {
     if (!quiz) return;
     if (status !== "playing") return;
     setSelectedOption(option);
     setTime(time);
     let points = 0;
     if (quiz.answer && quiz.answer.id === option.id) {
-      points = time < 5 ? 100 : time < 10 ? 70 : time < 20 ? 50 : 10;
+      points = time < 5 ? 100 : time < 10 ? 70 : time < 15 ? 50 : 10;
       setStatus("win-round");
     } else {
       setStatus("error-round");
@@ -192,7 +192,7 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
 
   const redo = useCallback(() => {
     if (isLoading || !animes) return;
-    const options = ["tag", "year", "genre", "studio", "chapters" ];
+    const options = ["studio", "year", "genre", "tag", "chapters"];
     const option = getRandomByArray(options);
     if (option === "year") {
       const quiz = getQuizByYear(animes, numOptions);
@@ -330,7 +330,8 @@ export function useAniQuizContext() {
 function getRandomByArrayNumber(animes: SearchAnime[], length: number = 1) {
   const addedAnimes: SearchAnime[] = [];
   if (length >= animes.length) return animes;
-  for (let i = 0; i < length; i++) {
+
+  while (addedAnimes.length < length) {
     const randomIndex = Math.floor(Math.random() * animes.length);
     const randomAnime = animes[randomIndex];
     if (!addedAnimes.map((anime) => anime.id).includes(randomAnime.id)) {
@@ -434,7 +435,7 @@ function getQuizByTag(
   animes: SearchAnime[],
   numOptions: number
 ): Quiz | undefined {
-    let operator = getRandomByArray(STRING_OPERATORS) ?? "contains";
+  let operator = getRandomByArray(STRING_OPERATORS) ?? "contains";
   // let operator: StringOperator = "notContains";
   while (true) {
     const base = getRandomByArray(animes);
@@ -472,11 +473,10 @@ function getQuizByTag(
     }
     const bait = getRandomByArrayNumber(wrongAnimes, numOptions - 1);
 
-
     const answer = getRandomByArray(correctAnimes);
     if (!bait || !answer) continue;
 
-    if(bait.length < numOptions - 1) {
+    if (bait.length < numOptions - 1) {
       operator = "contains";
       continue;
     }

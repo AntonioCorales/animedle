@@ -144,9 +144,11 @@ function Status() {
   const { state, selectedAnimes } = useGameContext();
   const { counter } = useCounterContext();
   const { length } = selectedAnimes;
+
+  const numCounter = Math.floor(counter);
   return (
     <div className="flex flex-row gap-2 justify-between items-end">
-      <div>Tiempo: {counter}s</div>
+      <div>Tiempo: {numCounter}s</div>
       {state === "win" && (
         <div className="text-green-500 p-2 rounded-md text-center font-bold">
           ¡VICTORIA!
