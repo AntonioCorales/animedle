@@ -44,6 +44,9 @@ export default function RootLayout({
                     <Link href={"/chara-anime"} className="hover:text-sky-400">
                       CharaAnime
                     </Link>
+                    <Link href={"/aniquiz"} className="hover:text-sky-400">
+                      AniQuiz
+                    </Link>
                   </div>
                 </div>
               </header>
@@ -57,7 +60,7 @@ export default function RootLayout({
               <footer className="w-full flex flex-row justify-center items-center gap-2 text-xs text-slate-100 text-center bg-gray-900 py-1">
                 <div className="m-auto w-full max-w-lg flex flex-col lg:flex-row lg:justify-between lg:max-w-screen-lg items-center">
                   <span>Desarrollado por: Kkuuhaku</span>
-                  <span>Versión: 1.1.3</span>
+                  <span>Versión: 1.2.0</span>
                   <div className="flex flex-col gap-1 items-end">
                     <span className="text-right ">
                       Contiene datos de la lista de{" "}

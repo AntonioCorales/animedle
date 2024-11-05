@@ -23,19 +23,19 @@ export function CounterProvider({ children }: React.PropsWithChildren) {
     const timeout = setTimeout(() => {
       if (state !== "play") return;
       setCounter((counter) => counter + 1);
-    }, 1000);
+    }, 10);
     return () => clearTimeout(timeout);
   }, [counter, state]);
 
   const reset = () => {
     setState("pause");
     setCounter(0);
-  };
+  };  
 
   return (
     <CounterContext.Provider
       value={{
-        counter,
+        counter: counter / 100,
         state,
         setState,
         reset,

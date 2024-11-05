@@ -8,19 +8,19 @@ type PageContext = {
   user: string;
   setUser: (user: string) => void;
   animes: SearchAnime[];
+  isLoading: boolean;
 };
 
 const PageContext = createContext<PageContext>({
   user: "",
   setUser: () => {},
   animes: [],
+  isLoading: false,
 });
 
 export function PageProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<string>("DoubleCReacts");
-  const { animes } = useGetAndFormatAnimes(user, {
-    tagsLimit: 4,
-  });
+  const { animes, isLoading } = useGetAndFormatAnimes(user);
 
   return (
     <PageContext.Provider
@@ -28,6 +28,7 @@ export function PageProvider({ children }: { children: React.ReactNode }) {
         user,
         setUser,
         animes,
+        isLoading
       }}
     >
       {children}

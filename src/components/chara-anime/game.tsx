@@ -13,6 +13,7 @@ export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
 
   return (
+    
     <div className="flex flex-col gap-4 flex-1">
       <div>
         <TitleStyles>CharaAnime</TitleStyles>
@@ -229,6 +230,7 @@ function precisionToText(
       "¡Vas bien!, pero te falta un poco de neuronas.",
       "¿Ya estás cansado?... Porque se esta notando",
       '"Hasta los fans de Dragon Ball saben mas." -Ahunae',
+      '"El chat te esta insultando ¿Te dejas?" - akio7512'
     ],
     90: [
       "¡Bueno, pero no tanto!",

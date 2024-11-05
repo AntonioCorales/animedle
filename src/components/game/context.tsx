@@ -1,6 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext,  useContext, useEffect, useState } from "react";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
-import { formatAnimes, useGetAndFormatAnimes } from "../utils/useGetAnime";
+import { formatAnimes, } from "../utils/useGetAnime";
 import { getRandomByArray } from "../utils/functions";
 import { usePageContext } from "../context";
 
