@@ -749,8 +749,6 @@ function getQuizBySeason(
       }
     });
 
-    console.log({correctAnimes, wrongAnimes, triesAnimes, base});
-
     if (correctAnimes.length === 0 || wrongAnimes.length < numOptions - 1)
       continue;
 
