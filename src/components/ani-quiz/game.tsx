@@ -5,6 +5,7 @@ import { useCounterContext } from "../game/counter-context";
 import { type Quiz, useAniQuizContext } from "./context";
 import { WinComponent } from "../game";
 import ConfettiExplosion from "react-confetti";
+import styled from "styled-components";
 
 export default function AniQuizGame() {
   const { status } = useAniQuizContext();
@@ -67,6 +68,21 @@ function Quiz() {
   );
 }
 
+const AnimationDown = styled.div`
+  @keyframes animation {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      top: 0;
+      transform: translateY(0);
+    }
+  }
+
+  animation: animation 0.5s ease-in-out;
+`;
+
 function Option(props: { option: SearchAnime }) {
   const { option } = props;
   const { status, quiz, onSelectOption, selectedOption } = useAniQuizContext();
@@ -81,6 +97,10 @@ function Option(props: { option: SearchAnime }) {
         : ""
       : "  cursor-pointer hover:border-sky-600 hover:outline hover:outline-2 hover:outline-sky-600 hover:shadow-lg hover:shadow-sky-600 ";
 
+  const genres = new Intl.ListFormat().format(option.genres);
+  const tags = new Intl.ListFormat().format([...option.tags.slice(0, 4)]);
+  const studios = new Intl.ListFormat().format(option.studios.map((s) => s.name));
+
   return (
     <div
       className={
@@ -92,6 +112,21 @@ function Option(props: { option: SearchAnime }) {
         setState("pause");
       }}
     >
+      {status !== "playing" && quiz && (
+        <AnimationDown
+          className="text-center max-w-[250px] 
+        text-base bg-slate-800/80 absolute 
+        top-0 left-0 w-full p-1 rounded-md"
+        >
+          {quiz.type === "chapters" && option.episodes}
+          {/* {quiz.type === "format" && option.format} */}
+          {quiz.type === "season" && `${option.season} - ${option.seasonYear}`}
+          {quiz.type === "year" && option.seasonYear}
+          {quiz.type === "genre" && <span className="text-sm">genres</span>}
+          {quiz.type === "studio" && studios}
+          {quiz.type === "tag" && <span className="text-sm " style={{lineHeight: "10px"}}>{tags}{4 < option.tags.length ? <span className="text-sky-400">... +{option.tags.length - 4} tags</span>: ""}</span>}          
+        </AnimationDown>
+      )}
       <img
         src={option.image}
         alt={option.name}
@@ -135,30 +170,30 @@ function TimerBar() {
       : counter > answeredTime
       ? status
       : "answered";
-  // const percent = 
+  // const percent =
   //   statusTimeBar === "thinking"
   //     ? counter / thinkingTime
   //     : (answeredTime - counter + thinkingTime) / answeredTime;
 
   const percent = 1 - counter / (answeredTime + thinkingTime);
-  
 
   const classByPercent =
-      counter > 15
+    counter > 15
       ? "bg-red-400"
       : counter > 10
-      ? "bg-yellow-400":
-      counter > 5
+      ? "bg-yellow-400"
+      : counter > 5
       ? "bg-green-400"
       : "bg-sky-400";
 
-  const borderByPercent = counter > 15 
-    ? "border-red-400"
-    : counter > 10
-    ? "border-yellow-400"
-    : counter > 5
-    ? "border-green-400"
-    : "border-sky-400";
+  const borderByPercent =
+    counter > 15
+      ? "border-red-400"
+      : counter > 10
+      ? "border-yellow-400"
+      : counter > 5
+      ? "border-green-400"
+      : "border-sky-400";
 
   return (
     <div className="flex flex-col gap-1">
@@ -180,7 +215,7 @@ function TimerBar() {
         <span>
           Ronda: {currentQuiz}/{totalQuiz}
         </span>
-        <span className="text-sky-400">Puntos: {totalPoints}</span>
+        <span>Puntos: {totalPoints}</span>
       </div>
     </div>
   );

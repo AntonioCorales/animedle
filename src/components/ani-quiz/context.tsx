@@ -12,6 +12,8 @@ import { NodesStudio } from "@/types/anime";
 
 export type NumberOperator = "lt" | "lte" | "gt" | "gte" | "eq" | "neq";
 export type StringOperator = "contains" | "notContains";
+export type SeasonOperator = "eq" | "neq";
+
 type OptionType =
   | "year"
   | "genre"
@@ -38,6 +40,8 @@ const NUMBER_OPERATORS: NumberOperator[] = [
   "neq",
 ];
 const STRING_OPERATORS: StringOperator[] = ["contains", "notContains"];
+
+const SEASON_OPERATORS: SeasonOperator[] = ["eq", "neq"];
 
 type AniQuizStatus =
   | "loading"
@@ -74,10 +78,22 @@ export type Quiz = {
   options: SearchAnime[];
   selectedOption?: SearchAnime | null;
   type: OptionType;
-  operator: NumberOperator | StringOperator;
+  operator: NumberOperator | StringOperator | SeasonOperator;  
   time?: number;
   points?: number;
-};
+} & ({
+  type: "genre" | "tag";
+  value: string[];
+} |{
+  type: "studio";
+  value: NodesStudio;
+} | {
+  type: "year" | "chapters";
+  value: number;
+} | {
+  type: "season";
+  value: string;
+})
 
 const AniQuizContext = createContext<AniQuizContext>({
   currentQuiz: 0,
@@ -102,7 +118,6 @@ export const AniQuizProvider = ({
 }) => {
   const [currentQuiz, setCurrentQuiz] = useState(1);
   const [totalQuiz, setTotalQuiz] = useState(10);
-  const [options, setOptions] = useState<Quiz[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [numOptions, setNumOptions] = useState(4);
   const [status, setStatus] = useState<AniQuizStatus>("init");
@@ -192,8 +207,10 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
 
   const redo = useCallback(() => {
     if (isLoading || !animes) return;
-    const options = ["studio", "year", "genre", "tag", "chapters"];
+    const options = ["season", "year", "chapters", "genre", "tag", "studio"]
+
     const option = getRandomByArray(options);
+
     if (option === "year") {
       const quiz = getQuizByYear(animes, numOptions);
       if (!quiz) return;
@@ -212,6 +229,10 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
       setQuiz(quiz);
     } else if (option === "chapters") {
       const quiz = getQuizByChapters(animes, numOptions);
+      if (!quiz) return;
+      setQuiz(quiz);
+    } else if (option === "season") {
+      const quiz = getQuizBySeason(animes, numOptions);
       if (!quiz) return;
       setQuiz(quiz);
     }
@@ -295,6 +316,7 @@ function getQuizByYear(
       options,
       operator: yearOperator,
       type: "year",
+      value: year,
     };
   }
 }
@@ -391,6 +413,7 @@ function getQuizByGenre(
       options,
       operator,
       type: "genre",
+      value: genres,
     };
   }
 }
@@ -492,6 +515,7 @@ function getQuizByTag(
       options,
       operator,
       type: "tag",
+      value: tags,
     };
   }
 }
@@ -570,6 +594,7 @@ function getQuizByStudio(
       options,
       operator,
       type: "studio",
+      value: studio,
     };
   }
 }
@@ -658,6 +683,7 @@ function getQuizByChapters(
       options,
       operator,
       type: "chapters",
+      value: chapters,
     };
   }
 }
@@ -677,4 +703,113 @@ function chaptersQuizString(chapters: number, operator: NumberOperator) {
     return `¿Cuál de estos animes no tiene ${chapters} capítulos?`;
   }
   return "";
+}
+
+function getQuizBySeason(
+  animes: SearchAnime[],
+  numOptions: number
+): Quiz | undefined {
+  let triesAnimes: number[] = [];
+  // let operator: SeasonOperator = getRandomByArray(SEASON_OPERATORS) ?? "eq";
+  let operator: SeasonOperator = "neq";
+  let tries = 0;
+  while (tries < 10) {
+    tries++;
+    if (triesAnimes.length >= 20) {
+      operator = "eq";
+      triesAnimes = [];
+      continue;
+    }
+
+    const base = getRandomByArray(animes);
+    if (!base || triesAnimes.includes(base.id)) continue;
+    triesAnimes.push(base.id);
+
+    const correctAnimes: SearchAnime[] = [];
+    const wrongAnimes: SearchAnime[] = [];
+
+    animes.forEach((anime) => {
+      if (anime.id === base.id) return;
+      
+      if (
+        anime.season === base.season &&
+        anime.seasonYear === base.seasonYear
+      ) {
+        if (operator === "eq") {
+          correctAnimes.push(anime);
+        } else {
+          wrongAnimes.push(anime);
+        }
+      } else {
+        if (operator === "eq") {
+          wrongAnimes.push(anime);
+        } else {
+          correctAnimes.push(anime);
+        }
+      }
+    });
+
+    console.log({correctAnimes, wrongAnimes, triesAnimes, base});
+
+    if (correctAnimes.length === 0 || wrongAnimes.length < numOptions - 1)
+      continue;
+
+    let answer: SearchAnime | null | undefined;
+
+    let a = 0;
+    while (!answer) {
+      const customCorrectAnimes = correctAnimes.filter(
+        (anime) => (anime.seasonYear + a === base.seasonYear ||
+          anime.seasonYear - a === base.seasonYear ) &&
+          anime.id !== base.id
+      )
+
+      if(customCorrectAnimes.length === 0 ) continue;
+
+      answer = getRandomByArray(customCorrectAnimes);
+      a++;
+    }
+
+    if (!answer) continue;
+
+    const bait: SearchAnime[] = [];
+
+    let i = 0;
+    while (bait.length < numOptions - 1) {
+      const customYearAnimes: SearchAnime[] = wrongAnimes.filter(
+        (anime) =>
+          (anime.seasonYear + i === base.seasonYear ||
+          anime.seasonYear - i === base.seasonYear ) &&
+          anime.id !== base.id && answer.id !== base.id
+      );
+
+      if (customYearAnimes.length === 0) continue;
+
+      const shuffleCustomYearAnimes = shuffleArray(customYearAnimes);      
+
+      bait.push(
+        ...shuffleCustomYearAnimes.slice(0, numOptions - 1 - bait.length)
+      );
+      i++;
+    }
+    bait.push(answer)
+    const options = shuffleArray(bait)
+
+    return {
+      answer,
+      operator: "eq",
+      options,
+      type: "season",
+      question: seasonQuizString(base.name, operator),
+      value: answer.season + "-" + answer.seasonYear,
+    };
+  }
+}
+
+function seasonQuizString(animeName: string, operator: SeasonOperator): string {
+  if (operator === "eq") {
+    return `¿Cuál de estos animes salio en la misma temporada que "${animeName}"?`;
+  } else {
+    return `¿Cuál de estos animes salió en una temporada diferente a "${animeName}"?`;
+  }
 }
