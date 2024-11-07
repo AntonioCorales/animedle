@@ -33,7 +33,7 @@ function Quiz() {
     <>
       {!isLoading && quiz ? (
         <div className="flex flex-col gap-6 pt-8">
-          <h3 className="text-center text-sky-400 text-xl">{quiz.question}</h3>
+          <h3 className="text-center text-sky-400 text-xl text-balance">{quiz.question}</h3>
 
           <TimerBar />
           <div className="grid grid-cols-4 gap-2 content-center">
