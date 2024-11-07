@@ -798,16 +798,16 @@ function getQuizBySeason(
       operator: "eq",
       options,
       type: "season",
-      question: seasonQuizString(base.name, operator),
-      value: answer.season + "-" + answer.seasonYear,
+      question: seasonQuizString(base.name, base.season + "-" + base.seasonYear, operator),
+      value: base.season + "-" + base.seasonYear,
     };
   }
 }
 
-function seasonQuizString(animeName: string, operator: SeasonOperator): string {
+function seasonQuizString(animeName: string, seasonString: string, operator: SeasonOperator): string {
   if (operator === "eq") {
-    return `¿Cuál de estos animes salio en la misma temporada que "${animeName}"?`;
+    return `¿Cuál de estos animes salio en la misma temporada que "${animeName}" (${seasonString})?`;
   } else {
-    return `¿Cuál de estos animes salió en una temporada diferente a "${animeName}"?`;
+    return `¿Cuál de estos animes salió en una temporada diferente a "${animeName}" (${seasonString})?`;
   }
 }
