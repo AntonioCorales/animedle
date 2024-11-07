@@ -798,8 +798,8 @@ function getQuizBySeason(
       operator: "eq",
       options,
       type: "season",
-      question: seasonQuizString(base.name, base.season + "-" + base.seasonYear, operator),
-      value: base.season + "-" + base.seasonYear,
+      question: seasonQuizString(base.name, base.season + " - " + base.seasonYear, operator),
+      value: base.season + " - " + base.seasonYear,
     };
   }
 }
