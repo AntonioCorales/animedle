@@ -13,6 +13,7 @@ import { NodesStudio } from "@/types/anime";
 export type NumberOperator = "lt" | "lte" | "gt" | "gte" | "eq" | "neq";
 export type StringOperator = "contains" | "notContains";
 export type SeasonOperator = "eq" | "neq";
+export type QuantityChaptersOperator = "more" | "less";
 
 type OptionType =
   | "year"
@@ -21,7 +22,8 @@ type OptionType =
   | "format"
   | "chapters"
   | "season"
-  | "studio";
+  | "studio"
+  | "quantityChapters";
 
 const OPTION_TYPES: OptionType[] = [
   "year",
@@ -42,6 +44,11 @@ const NUMBER_OPERATORS: NumberOperator[] = [
 const STRING_OPERATORS: StringOperator[] = ["contains", "notContains"];
 
 const SEASON_OPERATORS: SeasonOperator[] = ["eq", "neq"];
+
+const QUANTITY_CHAPTERS_OPERATORS: QuantityChaptersOperator[] = [
+  "more",
+  "less",
+];
 
 type AniQuizStatus =
   | "loading"
@@ -78,22 +85,35 @@ export type Quiz = {
   options: SearchAnime[];
   selectedOption?: SearchAnime | null;
   type: OptionType;
-  operator: NumberOperator | StringOperator | SeasonOperator;  
   time?: number;
   points?: number;
-} & ({
-  type: "genre" | "tag";
-  value: string[];
-} |{
-  type: "studio";
-  value: NodesStudio;
-} | {
-  type: "year" | "chapters";
-  value: number;
-} | {
-  type: "season";
-  value: string;
-})
+} & (
+  | {
+      type: "genre" | "tag";
+      value: string[];
+      operator: StringOperator;
+    }
+  | {
+      type: "studio";
+      value: NodesStudio;
+      operator: StringOperator;
+    }
+  | {
+      type: "year" | "chapters";
+      value: number;
+      operator: NumberOperator;
+    }
+  | {
+      type: "season";
+      value: string;
+      operator: SeasonOperator;
+    }
+  | {
+      type: "quantityChapters";
+      value?: undefined;
+      operator: QuantityChaptersOperator;
+    }
+);
 
 const AniQuizContext = createContext<AniQuizContext>({
   currentQuiz: 0,
@@ -150,7 +170,7 @@ export const AniQuizProvider = ({
     setTime(time);
     let points = 0;
     if (quiz.answer && quiz.answer.id === option.id) {
-      points = time < 5 ? 100 : time < 10 ? 70 : time < 15 ? 50 : 10;
+      points = time < 10 ? 100 : time < 15 ? 70 : time < 20 ? 50 : 10;
       setStatus("win-round");
     } else {
       setStatus("error-round");
@@ -186,7 +206,7 @@ export const AniQuizProvider = ({
         status,
         onSelectOption,
         selectedOption,
-        thinkingTime: 5,
+        thinkingTime: 10,
         answeredTime: 15,
         startGame,
         restartGame,
@@ -207,7 +227,15 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
 
   const redo = useCallback(() => {
     if (isLoading || !animes) return;
-    const options = ["season", "year", "chapters", "genre", "tag", "studio"]
+    const options = [
+      "season",
+      "year",
+      "chapters",
+      "genre",
+      "tag",
+      "studio",
+      "quantityChapters",
+    ];
 
     const option = getRandomByArray(options);
 
@@ -233,6 +261,10 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
       setQuiz(quiz);
     } else if (option === "season") {
       const quiz = getQuizBySeason(animes, numOptions);
+      if (!quiz) return;
+      setQuiz(quiz);
+    } else if (option === "quantityChapters") {
+      const quiz = getQuizByQuantityChapters(animes, numOptions);
       if (!quiz) return;
       setQuiz(quiz);
     }
@@ -622,6 +654,10 @@ function getQuizByChapters(
     const correctAnimes: SearchAnime[] = [];
     const wrongAnimes: SearchAnime[] = [];
 
+    if (base.episodes === 1 && (operator === "lte" || operator === "lt")) {
+      operator = "eq";
+    }
+
     animes.forEach((anime) => {
       if (operator === "eq") {
         if (anime.episodes === chapters) {
@@ -710,8 +746,8 @@ function getQuizBySeason(
   numOptions: number
 ): Quiz | undefined {
   let triesAnimes: number[] = [];
-  // let operator: SeasonOperator = getRandomByArray(SEASON_OPERATORS) ?? "eq";
-  let operator: SeasonOperator = "neq";
+  let operator: SeasonOperator = getRandomByArray(SEASON_OPERATORS) ?? "eq";
+  // let operator: SeasonOperator = "neq";
   let tries = 0;
   while (tries < 10) {
     tries++;
@@ -730,7 +766,7 @@ function getQuizBySeason(
 
     animes.forEach((anime) => {
       if (anime.id === base.id) return;
-      
+
       if (
         anime.season === base.season &&
         anime.seasonYear === base.seasonYear
@@ -752,62 +788,119 @@ function getQuizBySeason(
     if (correctAnimes.length === 0 || wrongAnimes.length < numOptions - 1)
       continue;
 
-    let answer: SearchAnime | null | undefined;
+    const answer = getRandomByArray(correctAnimes);
 
-    let a = 0;
-    while (!answer) {
-      const customCorrectAnimes = correctAnimes.filter(
-        (anime) => (anime.seasonYear + a === base.seasonYear ||
-          anime.seasonYear - a === base.seasonYear ) &&
-          anime.id !== base.id
-      )
+    // let a = 0;
+    // while (!answer) {
+    //   const customCorrectAnimes = correctAnimes.filter(
+    //     (anime) => (anime.seasonYear + a === base.seasonYear ||
+    //       anime.seasonYear - a === base.seasonYear ) &&
+    //       anime.id !== base.id
+    //   )
 
-      if(customCorrectAnimes.length === 0 ) continue;
+    //   if(customCorrectAnimes.length === 0 ) continue;
 
-      answer = getRandomByArray(customCorrectAnimes);
-      a++;
-    }
+    //   answer = getRandomByArray(customCorrectAnimes);
+    //   a++;
+    // }
 
     if (!answer) continue;
 
-    const bait: SearchAnime[] = [];
+    const bait: SearchAnime[] = getRandomByArrayNumber(
+      wrongAnimes,
+      numOptions - 1
+    );
 
-    let i = 0;
-    while (bait.length < numOptions - 1) {
-      const customYearAnimes: SearchAnime[] = wrongAnimes.filter(
-        (anime) =>
-          (anime.seasonYear + i === base.seasonYear ||
-          anime.seasonYear - i === base.seasonYear ) &&
-          anime.id !== base.id && answer.id !== base.id
-      );
+    // let i = 0;
+    // while (bait.length < numOptions - 1) {
+    //   const customYearAnimes: SearchAnime[] = wrongAnimes.filter(
+    //     (anime) =>
+    //       (anime.seasonYear + i === base.seasonYear ||
+    //       anime.seasonYear - i === base.seasonYear ) &&
+    //       anime.id !== base.id && answer.id !== base.id
+    //   );
 
-      if (customYearAnimes.length === 0) continue;
+    //   if (customYearAnimes.length === 0) continue;
 
-      const shuffleCustomYearAnimes = shuffleArray(customYearAnimes);      
+    //   const shuffleCustomYearAnimes = shuffleArray(customYearAnimes);
 
-      bait.push(
-        ...shuffleCustomYearAnimes.slice(0, numOptions - 1 - bait.length)
-      );
-      i++;
-    }
-    bait.push(answer)
-    const options = shuffleArray(bait)
+    //   bait.push(
+    //     ...shuffleCustomYearAnimes.slice(0, numOptions - 1 - bait.length)
+    //   );
+    //   i++;
+    // }
+
+    if (bait.length < numOptions - 1) continue;
+
+    bait.push(answer);
+    const options = shuffleArray(bait);
 
     return {
       answer,
-      operator: "eq",
+      operator,
       options,
       type: "season",
-      question: seasonQuizString(base.name, base.season + " - " + base.seasonYear, operator),
+      question: seasonQuizString(
+        base.name,
+        base.season + " - " + base.seasonYear,
+        operator
+      ),
       value: base.season + " - " + base.seasonYear,
     };
   }
 }
 
-function seasonQuizString(animeName: string, seasonString: string, operator: SeasonOperator): string {
+function seasonQuizString(
+  animeName: string,
+  seasonString: string,
+  operator: SeasonOperator
+): string {
   if (operator === "eq") {
     return `¿Cuál de estos animes salio en la misma temporada que "${animeName}" (${seasonString})?`;
   } else {
     return `¿Cuál de estos animes salió en una temporada diferente a "${animeName}" (${seasonString})?`;
   }
+}
+
+function getQuizByQuantityChapters(
+  animes: SearchAnime[],
+  numOptions: number
+): Quiz | undefined {
+  const operator = getRandomByArray(QUANTITY_CHAPTERS_OPERATORS) ?? "more";
+  const options: SearchAnime[] = [];
+  const alreadySelected: number[] = [];
+  while (options.length < numOptions) {
+    const anime = getRandomByArray(animes);
+    if (!anime) continue;
+    if (alreadySelected.includes(anime.id)) continue;
+    if (options.some((op) => op.episodes === anime.episodes)) continue;
+    options.push(anime);
+    alreadySelected.push(anime.id);
+  }
+
+  const orderAnimes = options.toSorted((a, b) => {
+     if(operator === "more") return b.episodes -a.episodes  ;
+     return a.episodes - b.episodes;
+  });
+
+  const answer = orderAnimes[0];
+
+  return {
+    question: quantityChaptersQuizString(operator),
+    answer,
+    options,
+    operator,
+    type: "quantityChapters",
+  };
+}
+
+function quantityChaptersQuizString(
+  operator: QuantityChaptersOperator
+) {
+  if (operator === "more") {
+    return `¿Cuál de estos animes tiene más capítulos?`;
+  } else if (operator === "less") {
+    return `¿Cuál de estos animes tiene menos capítulos?`;
+  }
+  return "";
 }

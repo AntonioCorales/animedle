@@ -118,13 +118,13 @@ function Option(props: { option: SearchAnime }) {
         text-base bg-slate-800/80 absolute 
         top-0 left-0 w-full p-1 rounded-md"
         >
-          {quiz.type === "chapters" && option.episodes}
           {/* {quiz.type === "format" && option.format} */}
           {quiz.type === "season" && `${option.season} - ${option.seasonYear}`}
           {quiz.type === "year" && option.seasonYear}
           {quiz.type === "genre" && <span className="text-sm">{genres}</span>}
           {quiz.type === "studio" && studios}
           {quiz.type === "tag" && <span className="text-sm " style={{lineHeight: "10px"}}>{tags}{4 < option.tags.length ? <span className="text-sky-400">... +{option.tags.length - 4} tags</span>: ""}</span>}          
+          {(quiz.type === "quantityChapters" || quiz.type === "chapters") && <span className="text-sm ">{option.episodes} {option.episodes === 1 ? "capítulo" : "capítulos"}</span>}
         </AnimationDown>
       )}
       <img
