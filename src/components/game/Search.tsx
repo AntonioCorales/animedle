@@ -16,7 +16,8 @@ export default function SearchAnimeSelect(props: SearchProps) {
     onSelect,
     disabled,
     formatOptions,
-    excludeAnimes,
+    excludeAnimes = [],
+    hideImage,
   } = props;
   const { user } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
@@ -27,7 +28,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [disabledA, setDisabled] = useState(false);
 
-  const filteredAnimes = useFilteredAnimes(excludeAnimes ?? [], animes, search);
+  const filteredAnimes = useFilteredAnimes(excludeAnimes, animes, search);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -35,7 +36,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
 
   const handleSelect = useCallback(
     (anime: SearchAnime) => {
-      if(!search) return;
+      if (!search) return;
       setIsOpen(false);
       onSelect?.(anime);
       setSearch("");
@@ -50,6 +51,7 @@ export default function SearchAnimeSelect(props: SearchProps) {
   );
 
   useEffect(() => {
+    
     const animes = formatAnimes(data, formatOptions);
     setAnimes(animes);
   }, [data, formatOptions]);
@@ -94,13 +96,16 @@ export default function SearchAnimeSelect(props: SearchProps) {
       }
     };
 
+    const handleFocusIn = () => {
+      setIsOpen(true);
+    };
+
     const divElement = ref.current;
+    
 
     divElement?.addEventListener("click", handleClickInside);
     document.addEventListener("click", handleClickOutside);
-    divElement?.addEventListener("focusIn", () => {
-      setIsOpen(true);
-    });
+    divElement?.addEventListener("focusIn", handleFocusIn);
     divElement?.addEventListener("keydown", handleKeyDown);
     divElement?.addEventListener("keydown", handleEnter);
 
@@ -109,8 +114,9 @@ export default function SearchAnimeSelect(props: SearchProps) {
       divElement?.removeEventListener("click", handleClickInside);
       divElement?.removeEventListener("keydown", handleKeyDown);
       divElement?.removeEventListener("keydown", handleEnter);
+      divElement?.removeEventListener("focusIn", handleFocusIn);
     };
-  }, [ref, filteredAnimes, handleSelect, selectedIndex]);
+  }, [filteredAnimes, handleSelect, selectedIndex, ref, search]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -168,15 +174,17 @@ export default function SearchAnimeSelect(props: SearchProps) {
                 handleSelect(filteredAnime);
               }}
             >
-              <div className="min-w-[60px] max-w-[60px]">
-                <img
-                  src={filteredAnime.image}
-                  className="rounded-md w-full object-cover"
-                  alt={filteredAnime.name}
-                  width={60}
-                  height={85}
-                />
-              </div>
+              {!hideImage && (
+                <div className="min-w-[60px] max-w-[60px]">
+                  <img
+                    src={filteredAnime.image}
+                    className="rounded-md w-full object-cover"
+                    alt={filteredAnime.name}
+                    width={60}
+                    height={85}
+                  />
+                </div>
+              )}
               <div className="flex flex-col gap-1">
                 <span className="text-base font-bold leading-5">
                   {filteredAnime.name}
@@ -265,4 +273,5 @@ type SearchProps = {
   formatOptions?: FormatAnimesOptions;
   className?: string;
   excludeAnimes?: number[];
+  hideImage?: boolean;
 };

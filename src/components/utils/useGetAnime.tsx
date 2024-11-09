@@ -67,6 +67,7 @@ export function formatAnimes(
       format: media.format,
       season: media.season,
       description: media.description,
+      image_large: media.coverImage.extraLarge,
       studios
     };
   });

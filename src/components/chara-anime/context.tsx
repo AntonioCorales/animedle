@@ -56,6 +56,7 @@ export type CharaAnimeContext = {
   setNumCharacters: (position: number) => void;
   selectedAnimes: SearchAnime[];
   numCorrects: number;
+  startGame: () => void;
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -84,6 +85,7 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   setNumCharacters: () => {},
   selectedAnimes: [],
   numCorrects: 0,
+  startGame: () => {},
 });
 
 export function CharaAnimeProvider({
@@ -105,8 +107,6 @@ export function CharaAnimeProvider({
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
 
-  console.log({animesAlreadyShowed})
-
   const {
     characters,
     isLoading: isLoadingCharacters,
@@ -114,16 +114,17 @@ export function CharaAnimeProvider({
     animes,
   } = useGetCharactersToCharaAnime(animesAlreadyShowed);
 
-  const initRound = () => {
-    redo();
+  const startGame = () => {    
+    setCurrentRound(1);
     setCurrentPosition(0);
     setSelectedAnimes([]);
+    setStatus("stale");
+  };
 
-    const timeout = setTimeout(() => {
-      setStatus("stale");
-    }, 300);
-
-    return () => clearTimeout(timeout);
+  const initRound = () => {
+    setCurrentPosition(0);
+    setSelectedAnimes([]);
+    setStatus("stale");
   };
 
   const initGame = () => {
@@ -227,6 +228,7 @@ export function CharaAnimeProvider({
         setNumCharacters,
         selectedAnimes,
         numCorrects,
+        startGame,
       }}
     >
       {children}

@@ -2,7 +2,7 @@ import { SubtitleStyles, TitleStyles } from "../common";
 import { useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
 import FlipCard from "./FlipCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
 import { ArrowRightAlt, Check, Close, RestartAlt } from "@mui/icons-material";
@@ -32,7 +32,7 @@ export default function CharaAnimeGame() {
 }
 
 function Init() {
-  const { nextRound, setTotalRounds } = useCharaAnimeContext();
+  const { startGame, setTotalRounds } = useCharaAnimeContext();
   const [number, setNumber] = useState(10);
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
@@ -51,7 +51,7 @@ function Init() {
       <button
         onClick={() => {
           setTotalRounds(number > 0 ? number : 1);
-          nextRound();
+          startGame();
         }}
         className="bg-green-800 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
       >
@@ -278,6 +278,7 @@ function precisionToText(
 
 function End() {
   const { totalPoints, rounds, totalRounds, initGame, numCorrects } = useCharaAnimeContext();
+  const [pointsText, setPointsText] = useState("Calculando...");
   const totalTries = rounds.reduce(
     (prev, curr) => prev + (curr.selectedAnimes.length === 0 ? 1 : curr.selectedAnimes.length),
     0
@@ -290,7 +291,9 @@ function End() {
   const pointsPercent = Math.round((totalPoints / maxPoints) * 1000) / 10;
   const pointsClass = precisionToClass(pointsPercent);
 
-  const pointsText = precisionToText(precision, pointsPercent);
+  useEffect(() => {
+    setPointsText(precisionToText(precision, pointsPercent));
+  }, [precision, pointsPercent]);
 
   return (
     <div className="flex flex-col gap-3 justify-center items-center pb-64 flex-1">
@@ -429,7 +432,7 @@ function AnimeSelectedCard(props: AnimeSelectedCardProps) {
   );
 
   return (
-    <CardAnimationPuseStyles>
+    <CardAnimationPulseStyles>
       <div
         className={`flex gap-2 p-2 rounded-md ${
           isCorrect ? "bg-green-700" : "bg-red-600"
@@ -440,7 +443,7 @@ function AnimeSelectedCard(props: AnimeSelectedCardProps) {
         </div>
         <div className="flex flex-1">{anime.name}</div>
       </div>
-    </CardAnimationPuseStyles>
+    </CardAnimationPulseStyles>
   );
 }
 
@@ -460,7 +463,7 @@ const AnimationPulseStyles = styled.div`
   }
 `;
 
-const CardAnimationPuseStyles = styled.div`
+export const CardAnimationPulseStyles = styled.div`
   animation: pulse 1s;
   @keyframes pulse {
     0% {

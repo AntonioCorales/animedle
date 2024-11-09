@@ -11,6 +11,7 @@ export type SearchAnime = {
   englishName?: string | null;
   altNames: string[];
   image: string;
+  image_large: string;
   genres: string[];
   tags: string[];
   episodes: number;
