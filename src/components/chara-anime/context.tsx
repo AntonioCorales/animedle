@@ -1,10 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useGetAndFormatRandomAnime } from "../utils/useGetAnime";
 import { useGetCharactersByAnimeIdMAL } from "../queries/getCharactersByAnime";
 import { CharacterData } from "@/types/characters";
 import { useGetAnimesRelatedToAL } from "../queries/getAnimesRelatedTo";
 import { usePageContext } from "../context";
 import { SearchAnime } from "../game/context";
+import { useGetAnimeRelated } from "../utils/useGetAnimeRelated";
+import { getRandomByArray } from "../utils/functions";
 
 type CharaAnimeStatus =
   | "loading"
@@ -100,31 +102,37 @@ export function CharaAnimeProvider({
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [time, setTime] = useState<number>(0);
   const [animesAlreadyShowed, setAnimesAlreadyShowed] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [numCharacters, setNumCharacters] = useState(4);
   const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
 
+  const { animes: animesTotal } = usePageContext();
+
   const {
     characters,
     isLoading: isLoadingCharacters,
     redo,
-    animes,
-  } = useGetCharactersToCharaAnime(animesAlreadyShowed);
+    anime,
+  } = useGetCharactersToCharaAnime(animesAlreadyShowed, animesTotal);
+
+  const animes = useGetAnimeRelated(animesTotal, anime?.id);
 
   const startGame = () => {    
     setCurrentRound(1);
     setCurrentPosition(0);
     setSelectedAnimes([]);
     setStatus("stale");
+    redo();
   };
 
   const initRound = () => {
     setCurrentPosition(0);
     setSelectedAnimes([]);
-    setStatus("stale");
+    setTimeout(() => {
+      setStatus("stale");
+    }, 500);
   };
 
   const initGame = () => {
@@ -150,8 +158,8 @@ export function CharaAnimeProvider({
         (a) =>
           a.id === anime.id ||
           a.idMal === anime.idMal ||
-          a.name.includes(anime.name) ||
-          anime.name.includes(a.name)
+          a.englishName === anime.englishName ||
+          a.name === anime.name
       )
     ) {
       setNumCorrects((prev) => prev + 1);
@@ -198,6 +206,7 @@ export function CharaAnimeProvider({
     }
     setCurrentRound((prev) => prev + 1);
     initRound();
+    redo();
   };
 
   return (
@@ -205,7 +214,7 @@ export function CharaAnimeProvider({
       value={{
         characters: characters ?? [],
         animes,
-        isLoading: isLoading || isLoadingCharacters,
+        isLoading: isLoadingCharacters,
         status,
         setStatus,
         redo: initRound,
@@ -236,63 +245,37 @@ export function CharaAnimeProvider({
   );
 }
 
-export function useGetCharactersToCharaAnime(alreadyShowed: number[]) {
-  const { user } = usePageContext();
-  const {
-    anime,
-    isLoading: isLoadingAnime,
-    redo,
-  } = useGetAndFormatRandomAnime(user, alreadyShowed);
+export function useGetCharactersToCharaAnime(alreadyShowed: number[] = [], animes: SearchAnime[] | null = []) {
+  const [anime, setAnime] = useState<SearchAnime | null>(null);
+  
 
   const { data: charactersData, isLoading } = useGetCharactersByAnimeIdMAL(
     anime?.idMal
   );
 
-  const { data: animes, isLoading: isLoadingRel } = useGetAnimesRelatedToAL(
-    anime?.id
-  );
-
   const [charactersToReturn, setCharactersToReturn] = useState<CharacterData[]>(
     []
   );
-  const [animesToReturn, setAnimesToReturn] = useState<MinAnimeData[]>([]);
 
   useEffect(() => {
     const charactersToReturn = getRandomCharacters(charactersData ?? [], 4);
     setCharactersToReturn(charactersToReturn);
   }, [charactersData]);
 
-  useEffect(() => {
-    if (!anime) return;
-    const animesToReturn = [
-      {
-        id: anime.id,
-        idMal: anime.idMal,
-        name: anime.name,
-        englishName: anime.englishName,
-      },
-    ].concat(
-      animes?.map((anime) => ({
-        id: anime.id,
-        idMal: anime.idMal,
-        name: anime.title.romaji,
-        englishName: anime.title.english,
-      })) ?? []
-    );
-
-    setAnimesToReturn(animesToReturn);
-  }, [animes, anime]);
+  const redo = useCallback(() => {
+    if (!animes) return;
+    if (!alreadyShowed) return;
+    const anime = getRandomByArray(animes.filter((anime) => !alreadyShowed.includes(anime.id)));
+    setAnime(anime);
+  }, [alreadyShowed, animes]);  
 
   return {
     characters: charactersToReturn,
     redo,
-    animes: animesToReturn,
+    anime,
     isLoading:
       isLoading ||
-      isLoadingAnime ||
-      isLoadingRel ||
-      charactersToReturn.length === 0 ||
-      animesToReturn.length === 0,
+      charactersToReturn.length === 0
   };
 }
 

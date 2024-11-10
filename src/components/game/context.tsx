@@ -3,6 +3,14 @@ import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, } from "../utils/useGetAnime";
 import { getRandomByArray } from "../utils/functions";
 import { usePageContext } from "../context";
+import { MediaRelationNode } from "@/types/anime";
+
+export type SearchAnimeRelation = {
+  id: number;
+  idMal: number;
+  name: string;
+  englishName?: string | null;
+}
 
 export type SearchAnime = {
   id: number;
@@ -20,6 +28,7 @@ export type SearchAnime = {
   format: string;
   description?: string | null;
   studios: Studio[];
+  relations: SearchAnimeRelation[];
 };
 
 type Studio = {
@@ -87,7 +96,6 @@ export function GameProvider({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     const animes = formatAnimes(data, {tagsLimit: 4, types: ["Completed"]});
-    console.log(animes);
     setAnimes(animes);
     setAnime(getRandomByArray(animes));
   }, [data]);

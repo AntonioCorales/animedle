@@ -68,7 +68,15 @@ export function formatAnimes(
       season: media.season,
       description: media.description,
       image_large: media.coverImage.extraLarge,
-      studios
+      studios,
+      relations: media.relations.nodes.map((node) => {
+        return {
+          id: node.id,
+          idMal: node.idMal,
+          name: node.title.romaji,
+          englishName: node.title.english
+        }
+      })
     };
   });
 }
@@ -88,7 +96,7 @@ export function useGetAndFormatAnimes(
 
 export function useGetAndFormatRandomAnime(
   user: string,
-  excludeAnimes?: number[],
+  excludeAnimes: number[] = [],
   options?: FormatAnimesOptions
 ) {
   const { data, isLoading } = useGetAnimeByUser(user);
@@ -99,7 +107,8 @@ export function useGetAndFormatRandomAnime(
     const animes = formatAnimes(data);
     
     const filteredAnimes = animes.filter((anime) => {
-      return !(excludeAnimes?.includes(anime.id) ?? false);
+      if (excludeAnimes.length === 0) return true;
+      return !excludeAnimes.includes(anime.id)
     });
     const randomAnime = getRandomByArray(filteredAnimes);
     if (randomAnime) {

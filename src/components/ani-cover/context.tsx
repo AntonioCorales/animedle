@@ -1,5 +1,5 @@
 import { usePageContext } from "@/components/context";
-import { SearchAnime } from "@/components/game/context";
+import { SearchAnime, SearchAnimeRelation } from "@/components/game/context";
 import { getRandomByArray } from "@/components/utils/functions";
 import {
   createContext,
@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useGetAnimesRelatedToAL } from "../queries/getAnimesRelatedTo";
 import { Media } from "@/types/animes-related-al";
+import { useGetAnimeRelated } from "../utils/useGetAnimeRelated";
 
 type AniCoverStatus =
   | "loading"
@@ -29,7 +30,7 @@ type AniCoverContextType = {
   selectedAnimes: SearchAnime[];
   addAnime: (anime: SearchAnime) => void;
   restartGame: () => void;
-  relatedAnimes: Media[];
+  relatedAnimes: SearchAnimeRelation[];
 };
 
 const AniCoverContext = createContext<AniCoverContextType>({
@@ -50,7 +51,7 @@ export function AniCoverProvider({ children }: React.PropsWithChildren) {
 
   const { animes, isLoading: isPageLoading } = usePageContext();
 
-  const { data: relatedAnimes } = useGetAnimesRelatedToAL(answer?.id);
+  const relatedAnimes = useGetAnimeRelated(animes, answer?.id);
 
   const addAnime = (anime: SearchAnime) => {
     if (!answer) return;
@@ -88,7 +89,7 @@ export function AniCoverProvider({ children }: React.PropsWithChildren) {
         selectedAnimes,
         addAnime,
         restartGame,
-        relatedAnimes: relatedAnimes ?? [],
+        relatedAnimes,
       }}
     >
       {children}

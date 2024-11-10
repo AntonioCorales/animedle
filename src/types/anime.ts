@@ -47,7 +47,16 @@ export type Media = {
   studios: {
     nodes: NodesStudio[];
   }
+  relations: {
+    nodes: MediaRelationNode[];
+  }
 };
+
+export type MediaRelationNode = {
+  id: number;
+  idMal: number;
+  title: Title;
+}
 
 export type NodesStudio = {
   id: number;

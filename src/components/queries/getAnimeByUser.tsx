@@ -39,6 +39,16 @@ const queryAnimeByUser = `query Query($userName: String, $type: MediaType) {
               isAnimationStudio
             }
           }
+          relations {
+            nodes {
+              id
+              idMal
+              title {
+                english
+                romaji
+              }
+            }
+          }
         }
       }
       
