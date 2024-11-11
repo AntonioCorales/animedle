@@ -7,7 +7,7 @@ export function useGetAnimeRelated(
   animeId?: number | null
 ): SearchAnimeRelation[] {
   if (!animeId) return [];
-  const anime = animes.find((anime) => anime.id === 20832);
+  const anime = animes.find((anime) => anime.id === animeId);
   if (!anime) return [];
   const relatedAnimes = [...anime.relations];
   const relatedAnimes2 = animes.filter((animeF) => {
