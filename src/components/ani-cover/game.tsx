@@ -61,7 +61,7 @@ function Game() {
       </div>
       <div className="flex justify-center">
         <div
-          className={`w-fit overflow-hidden rounded-md outline outline-2 outline-sky-600 ${
+          className={`w-fit h-fit overflow-hidden rounded-md outline outline-2 outline-sky-600 ${
             status === "win" ? "outline-green-600" : "outline-red-600"
           }`}
         >
