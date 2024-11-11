@@ -4,6 +4,7 @@ import SearchAnimeSelect from "../game/Search";
 import { CardAnimationPulseStyles } from "../chara-anime/game";
 import { SearchAnime } from "../game/context";
 import { RefreshOutlined } from "@mui/icons-material";
+import ConfettiExplosion from "react-confetti";
 
 export default function AniCoverGame() {
   return (
@@ -19,7 +20,7 @@ export default function AniCoverGame() {
 }
 
 function GameBar() {
-  const { restartGame, selectedAnimes } = useAniCoverContext();
+  const { restartGame, selectedAnimes, status } = useAniCoverContext();
 
   return (
     <div className="flex gap-4 justify-between items-center">
@@ -32,6 +33,16 @@ function GameBar() {
       >
         <RefreshOutlined />
       </button>
+      {
+        status === "win" && <ConfettiExplosion
+        style={{
+          zIndex: 1000,
+          width: "90vw",
+          height: "100vh",
+          marginInline: "auto",
+        }}
+      />
+      }
     </div>
   );
 }
@@ -42,20 +53,27 @@ function Game() {
   const blur = status === "win" ? 0 : 10 - selectedAnimes.length;
   const grayscale = status === "win" ? 0 : (10 - selectedAnimes.length) * 10;
   return (
-    <div className="flex gap-6">
-      <div>
+    <div className="flex gap-6 flex-col-reverse md:flex-row">
+       <div className="flex-col gap-2 flex md:hidden">
+        {selectedAnimes.map((selectedAnime) => (
+          <SelectedAnime key={selectedAnime.id} anime={selectedAnime} />
+        ))}
+      </div>
+      <div className="flex justify-center">
         <div
-          className={`overflow-hidden rounded-md outline outline-2 outline-sky-600 ${
+          className={`w-fit overflow-hidden rounded-md outline outline-2 outline-sky-600 ${
             status === "win" ? "outline-green-600" : "outline-red-600"
           }`}
         >
           <img
             src={answer?.image_large}
-            alt={answer?.name}
+            alt={"image"}
             height={500}
             width={400}
+            className="select-none touch-none pointer-events-none"
             style={{
               filter: `blur(${blur}px) grayscale(${grayscale}%)`,
+
             }}
           />
         </div>
@@ -69,12 +87,13 @@ function Game() {
           hideImage
           excludeAnimes={selectedAnimes.map((anime) => anime.id)}
         />
-        <div className="flex flex-col gap-2">
+        <div className="flex-col gap-2 hidden md:flex">
           {selectedAnimes.map((selectedAnime) => (
             <SelectedAnime key={selectedAnime.id} anime={selectedAnime} />
           ))}
         </div>
       </div>
+     
     </div>
   );
 }

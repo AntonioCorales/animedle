@@ -3,7 +3,6 @@ import { SubtitleStyles, TitleStyles } from "../common";
 import { SearchAnime } from "../game/context";
 import { useCounterContext } from "../game/counter-context";
 import { type Quiz, useAniQuizContext } from "./context";
-import { WinComponent } from "../game";
 import ConfettiExplosion from "react-confetti";
 import styled from "styled-components";
 
@@ -36,12 +35,12 @@ function Quiz() {
           <h3 className="text-center text-sky-400 text-xl text-balance">{quiz.question}</h3>
 
           <TimerBar />
-          <div className="grid grid-cols-4 gap-2 content-center">
+          <div className="grid grid-cols-2 gap-y-4 justify-items-center md:grid-cols-4 md:gap-2 content-center">
             {quiz.options.map((option, index) => (
               <Option key={option.id + "-" + index} option={option} />
             ))}
           </div>
-          <div className="flex gap-2 justify-between items-center">
+          <div className="grid grid-cols-2 md:flex gap-2 md:justify-between items-center">
             <button
               onClick={restartGame}
               className="bg-blue-500 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
@@ -119,12 +118,12 @@ function Option(props: { option: SearchAnime }) {
         top-0 left-0 w-full p-1 rounded-md"
         >
           {/* {quiz.type === "format" && option.format} */}
-          {quiz.type === "season" && `${option.season} - ${option.seasonYear}`}
-          {quiz.type === "year" && option.seasonYear}
+          {quiz.type === "season" && <span className="text-sm md:text-base">{`${option.season} - ${option.seasonYear}`}</span>}
+          {quiz.type === "year" && <span className="text-sm md:text-base">option.seasonYear</span>}
           {quiz.type === "genre" && <span className="text-sm">{genres}</span>}
-          {quiz.type === "studio" && studios}
-          {quiz.type === "tag" && <span className="text-sm " style={{lineHeight: "10px"}}>{tags}{4 < option.tags.length ? <span className="text-sky-400">... +{option.tags.length - 4} tags</span>: ""}</span>}          
-          {(quiz.type === "quantityChapters" || quiz.type === "chapters") && <span className="text-sm ">{option.episodes} {option.episodes === 1 ? "capítulo" : "capítulos"}</span>}
+          {quiz.type === "studio" && <span className="text-sm md:text-base">{studios}</span>}
+          {quiz.type === "tag" && <span className="text-sm" style={{lineHeight: "10px"}}>{tags}{4 < option.tags.length ? <span className="text-sky-400">... +{option.tags.length - 4} tags</span>: ""}</span>}          
+          {(quiz.type === "quantityChapters" || quiz.type === "chapters") && <span className="text-sm md:text-base">{option.episodes} {option.episodes === 1 ? "capítulo" : "capítulos"}</span>}
         </AnimationDown>
       )}
       <img
