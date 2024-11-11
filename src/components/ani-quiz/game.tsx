@@ -119,7 +119,7 @@ function Option(props: { option: SearchAnime }) {
         >
           {/* {quiz.type === "format" && option.format} */}
           {quiz.type === "season" && <span className="text-sm md:text-base">{`${option.season} - ${option.seasonYear}`}</span>}
-          {quiz.type === "year" && <span className="text-sm md:text-base">option.seasonYear</span>}
+          {quiz.type === "year" && <span className="text-sm md:text-base">{option.seasonYear}</span>}
           {quiz.type === "genre" && <span className="text-sm">{genres}</span>}
           {quiz.type === "studio" && <span className="text-sm md:text-base">{studios}</span>}
           {quiz.type === "tag" && <span className="text-sm" style={{lineHeight: "10px"}}>{tags}{4 < option.tags.length ? <span className="text-sky-400">... +{option.tags.length - 4} tags</span>: ""}</span>}          
