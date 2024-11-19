@@ -13,7 +13,6 @@ export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
 
   return (
-    
     <div className="flex flex-col gap-4 flex-1">
       <div>
         <TitleStyles>CharaAnime</TitleStyles>
@@ -25,6 +24,7 @@ export default function CharaAnimeGame() {
         status === "playing" ||
         status === "win-round" ||
         status === "error-round" ||
+        status === "show-names" ||
         status === "loading") && <Playing />}
       {status === "end" && <End />}
     </div>
@@ -32,7 +32,7 @@ export default function CharaAnimeGame() {
 }
 
 function Init() {
-  const { startGame, setTotalRounds } = useCharaAnimeContext();
+  const { startGame, setTotalRounds, isLoading } = useCharaAnimeContext();
   const [number, setNumber] = useState(10);
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
@@ -49,13 +49,14 @@ function Init() {
         />
       </label>
       <button
+        disabled={isLoading}
         onClick={() => {
           setTotalRounds(number > 0 ? number : 1);
           startGame();
         }}
         className="bg-green-800 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
       >
-        Iniciar Juego
+        {isLoading ? "Cargando..." : "Iniciar Juego"}
       </button>
     </div>
   );
@@ -230,7 +231,7 @@ function precisionToText(
       "¡Vas bien!, pero te falta un poco de neuronas.",
       "¿Ya estás cansado?... Porque se esta notando",
       '"Hasta los fans de Dragon Ball saben mas." -Ahunae',
-      '"El chat te esta insultando ¿Te dejas?" - akio7512'
+      '"El chat te esta insultando ¿Te dejas?" - akio7512',
     ],
     90: [
       "¡Bueno, pero no tanto!",
@@ -265,7 +266,6 @@ function precisionToText(
     const isSuccess: "true" | "false" =
       precisionTries === 100 ? "true" : "false";
     return getRandomMessage(precisionTriesMessages[isSuccess]);
-
   }
 
   type Range = 0 | 25 | 50 | 75 | 90 | 100;
@@ -277,10 +277,13 @@ function precisionToText(
 }
 
 function End() {
-  const { totalPoints, rounds, totalRounds, initGame, numCorrects } = useCharaAnimeContext();
+  const { totalPoints, rounds, totalRounds, initGame, numCorrects } =
+    useCharaAnimeContext();
   const [pointsText, setPointsText] = useState("Calculando...");
   const totalTries = rounds.reduce(
-    (prev, curr) => prev + (curr.selectedAnimes.length === 0 ? 1 : curr.selectedAnimes.length),
+    (prev, curr) =>
+      prev +
+      (curr.selectedAnimes.length === 0 ? 1 : curr.selectedAnimes.length),
     0
   );
   const maxPoints = totalRounds * 40;
@@ -335,6 +338,7 @@ interface CardCharacterProps {
 }
 
 function CardCharacter(props: CardCharacterProps) {
+  const { status } = useCharaAnimeContext();
   const { characterData, disabled, onClick, position, flip } = props;
   const { character } = characterData;
   const { images } = character;
@@ -441,7 +445,10 @@ function AnimeSelectedCard(props: AnimeSelectedCardProps) {
         <div>
           <img src={anime.image} alt={anime.name} height={60} width={40} />
         </div>
-        <div className="flex flex-1">{anime.name}</div>
+        <div className="flex flex-1 flex-col">
+          <span>{anime.name}</span>
+          <span className="text-sm text-white/70">{anime.englishName}</span>
+        </div>
       </div>
     </CardAnimationPulseStyles>
   );

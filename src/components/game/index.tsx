@@ -10,7 +10,7 @@ import { SubtitleStyles, TitleStyles } from "../common";
 import { useCounterContext } from "./counter-context";
 
 export default function AnimeDleGame() {
-  const { addAnime, setState, anime, state, selectedAnimesIds } = useGameContext();
+  const { addAnime, setState, anime, state, selectedAnimesIds, showMainGenre, showYears, showMainTag } = useGameContext();
   const {setState: setCounterState} = useCounterContext();
   return (
     <>
@@ -45,6 +45,9 @@ export default function AnimeDleGame() {
             disabled={state === "win"}
             formatOptions={{tagsLimit: 4, types: ["Completed"]}}
             excludeAnimes={selectedAnimesIds}
+            showMainGenre={showMainGenre}
+            showMainTag={showMainTag}
+            showYears={showYears}
           />
           <Actions />
           <Status />
