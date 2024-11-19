@@ -655,7 +655,7 @@ function getQuizByChapters(
     const wrongAnimes: SearchAnime[] = [];
 
     if (base.episodes === 1 && (operator === "lte" || operator === "lt")) {
-      operator = "eq";
+      operator = getRandomByArray(["eq","gt", "gte", "neq"]) ?? "eq";
     }
 
     animes.forEach((anime) => {
@@ -726,17 +726,17 @@ function getQuizByChapters(
 
 function chaptersQuizString(chapters: number, operator: NumberOperator) {
   if (operator === "eq") {
-    return `¿Cuál de estos animes tiene ${chapters} capítulos?`;
+    return `¿Cuál de estos animes tiene ${chapters} ${chapters === 1 ? "capítulo" : "capítulos"}?`;
   } else if (operator === "lt") {
     return `¿Cuál de estos animes tiene menos de ${chapters} capítulos?`;
   } else if (operator === "lte") {
     return `¿Cuál de estos animes tiene igual o menos de ${chapters} capítulos?`;
   } else if (operator === "gt") {
-    return `¿Cuál de estos animes tiene más de ${chapters} capítulos?`;
+    return `¿Cuál de estos animes tiene más de ${chapters} ${chapters === 1 ? "capítulo" : "capítulos"}?`;
   } else if (operator === "gte") {
-    return `¿Cuál de estos animes tiene igual o más de ${chapters} capítulos?`;
+    return `¿Cuál de estos animes tiene igual o más de ${chapters} ${chapters === 1 ? "capítulo" : "capítulos"}?`;
   } else if (operator === "neq") {
-    return `¿Cuál de estos animes no tiene ${chapters} capítulos?`;
+    return `¿Cuál de estos animes no tiene ${chapters} ${chapters === 1 ? "capítulo" : "capítulos"}?`;
   }
   return "";
 }

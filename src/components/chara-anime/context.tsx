@@ -205,7 +205,6 @@ export function CharaAnimeProvider({
         },
       ]);
     }
-    setStatus("loading");
     if (totalRounds !== 0 && currentRound === totalRounds) {
       setStatus("end");
       return;
@@ -215,6 +214,16 @@ export function CharaAnimeProvider({
 
     redo(alreadyShowed);
   };
+
+  const reload = useCallback(()=>{
+    redo(animesAlreadyShowed);
+  }, [animesAlreadyShowed, redo]);
+
+  useEffect(() => {
+    if(isLoadingCharacters) return;
+    if(characters.length !== 0) return;
+    reload();
+  }, [reload, characters, isLoadingCharacters]);
 
   return (
     <CharaAnimeContext.Provider
