@@ -128,9 +128,7 @@ export function CharaAnimeProvider({
     setCurrentRound(1);
     setCurrentPosition(0);
     setSelectedAnimes([]);
-    setTimeout(() => {
-      setStatus("stale");
-    }, 500);
+    setStatus("stale");
     redo();
   };
 
@@ -158,12 +156,15 @@ export function CharaAnimeProvider({
   const addAnime = (anime: SearchAnime) => {
     const newSelectedAnimes = [anime, ...selectedAnimes];
     setSelectedAnimes(newSelectedAnimes);
+    console.log({ selectedAnime: anime });
     if (
       animes.some(
         (a) =>
           a.id === anime.id ||
           a.idMal === anime.idMal ||
-          a.englishName === anime.englishName ||
+          (anime.englishName &&
+            a.englishName &&
+            a.englishName === anime.englishName) ||
           a.name === anime.name
       )
     ) {
@@ -215,13 +216,13 @@ export function CharaAnimeProvider({
     redo(alreadyShowed);
   };
 
-  const reload = useCallback(()=>{
+  const reload = useCallback(() => {
     redo(animesAlreadyShowed);
   }, [animesAlreadyShowed, redo]);
 
   useEffect(() => {
-    if(isLoadingCharacters) return;
-    if(characters.length !== 0) return;
+    if (isLoadingCharacters) return;
+    if (characters.length !== 0) return;
     reload();
   }, [reload, characters, isLoadingCharacters]);
 
@@ -266,9 +267,12 @@ export function useGetCharactersToCharaAnime(
 ) {
   const [anime, setAnime] = useState<SearchAnime | null>(null);
 
-  const { data: charactersData, isLoading } = useGetCharactersByAnimeIdMAL(
-    anime?.idMal
-  );
+  const {
+    data: charactersData,
+    isLoading,
+    isRefetching,
+    isFetching,
+  } = useGetCharactersByAnimeIdMAL(anime?.idMal);
 
   const [charactersToReturn, setCharactersToReturn] = useState<CharacterData[]>(
     []
@@ -285,6 +289,7 @@ export function useGetCharactersToCharaAnime(
       const anime = getRandomByArray(
         animes.filter((anime) => !alreadyShowed.includes(anime.id))
       );
+
       setAnime(anime);
     },
     [animes]
@@ -294,7 +299,11 @@ export function useGetCharactersToCharaAnime(
     characters: charactersToReturn,
     redo,
     anime,
-    isLoading: isLoading || charactersToReturn.length === 0,
+    isLoading:
+      isLoading ||
+      isRefetching ||
+      isFetching ||
+      charactersToReturn.length === 0,
   };
 }
 

@@ -14,7 +14,10 @@ export function useGetAnimeRelated(
     return animeF.relations.some(
       (relation) =>
         relation.id === anime.id ||
-        anime.relations.some((an) => an.id === relation.id && !ListExcludesRelations.includes(an.id))
+        anime.relations.some(
+          (an) =>
+            an.id === relation.id && !ListExcludesRelations.includes(an.id)
+        )
     );
   });
 
@@ -26,7 +29,6 @@ export function useGetAnimeRelated(
     }
     const animeRel = animes.find((animeF) => animeF.id === relatedAnime.id);
     if (!animeRel) return;
-
 
     animeRel.relations.forEach((relation) => {
       if (ListExcludesRelations.includes(relation.id)) return;
@@ -60,5 +62,6 @@ export function useGetAnimeRelated(
     name: anime.name,
     englishName: anime.englishName,
   });
+
   return relatedAnimes;
 }

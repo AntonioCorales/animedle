@@ -89,13 +89,13 @@ function Playing() {
 }
 
 function Round() {
-  const { characters, currentPosition, setCurrentPosition, status } =
+  const { characters, currentPosition, setCurrentPosition, status, isLoading } =
     useCharaAnimeContext();
 
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
-        {status !== "loading" &&
+        {(status !== "loading" || isLoading) &&
           characters.map((character, index) => (
             <CardCharacter
               key={index + "-" + character.character.malID}
@@ -338,7 +338,6 @@ interface CardCharacterProps {
 }
 
 function CardCharacter(props: CardCharacterProps) {
-  const { status } = useCharaAnimeContext();
   const { characterData, disabled, onClick, position, flip } = props;
   const { character } = characterData;
   const { images } = character;
