@@ -33,16 +33,16 @@ function GameBar() {
       >
         <RefreshOutlined />
       </button>
-      {
-        status === "win" && <ConfettiExplosion
-        style={{
-          zIndex: 1000,
-          width: "90vw",
-          height: "100vh",
-          marginInline: "auto",
-        }}
-      />
-      }
+      {status === "win" && (
+        <ConfettiExplosion
+          style={{
+            zIndex: 1000,
+            width: "90vw",
+            height: "100vh",
+            marginInline: "auto",
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -54,7 +54,7 @@ function Game() {
   const grayscale = status === "win" ? 0 : (10 - selectedAnimes.length) * 10;
   return (
     <div className="flex gap-6 flex-col-reverse md:flex-row">
-       <div className="flex-col gap-2 flex md:hidden">
+      <div className="flex-col gap-2 flex md:hidden">
         {selectedAnimes.map((selectedAnime) => (
           <SelectedAnime key={selectedAnime.id} anime={selectedAnime} />
         ))}
@@ -73,7 +73,6 @@ function Game() {
             className="select-none touch-none pointer-events-none"
             style={{
               filter: `blur(${blur}px) grayscale(${grayscale}%)`,
-
             }}
           />
         </div>
@@ -93,7 +92,6 @@ function Game() {
           ))}
         </div>
       </div>
-     
     </div>
   );
 }

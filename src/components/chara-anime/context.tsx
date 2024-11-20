@@ -70,7 +70,7 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   characters: [],
   animes: [],
   isLoading: true,
-  status: "loading",
+  status: "init",
   setStatus: () => {},
   redo: () => {},
   totalRounds: 0,
@@ -156,7 +156,6 @@ export function CharaAnimeProvider({
   const addAnime = (anime: SearchAnime) => {
     const newSelectedAnimes = [anime, ...selectedAnimes];
     setSelectedAnimes(newSelectedAnimes);
-    console.log({ selectedAnime: anime });
     if (
       animes.some(
         (a) =>
@@ -217,12 +216,13 @@ export function CharaAnimeProvider({
   };
 
   const reload = useCallback(() => {
+    initRound();
     redo(animesAlreadyShowed);
   }, [animesAlreadyShowed, redo]);
 
   useEffect(() => {
     if (isLoadingCharacters) return;
-    if (characters.length !== 0) return;
+    if (characters.length === 4) return;
     reload();
   }, [reload, characters, isLoadingCharacters]);
 
@@ -234,7 +234,7 @@ export function CharaAnimeProvider({
         isLoading: isLoadingAnimes,
         status,
         setStatus,
-        redo: initRound,
+        redo: reload,
         totalRounds,
         setTotalRounds,
         currentRound,

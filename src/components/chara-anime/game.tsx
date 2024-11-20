@@ -5,7 +5,13 @@ import FlipCard from "./FlipCard";
 import { useEffect, useState } from "react";
 import SearchAnimeSelect from "../game/Search";
 import { WinComponent } from "./WinComponent";
-import { ArrowRightAlt, Check, Close, RestartAlt } from "@mui/icons-material";
+import {
+  ArrowRightAlt,
+  Check,
+  Close,
+  RefreshOutlined,
+  RestartAlt,
+} from "@mui/icons-material";
 import { SearchAnime } from "../game/context";
 import styled from "styled-components";
 
@@ -144,6 +150,30 @@ function Stats() {
   );
 }
 
+function ButtonReload() {
+  const { redo, isLoading } = useCharaAnimeContext();
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isLoading) return;
+      setCounter(counter + 1);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [counter, isLoading]);
+
+  if (counter < 2) return null;
+  return (
+    <button className="hover:scale-105 bg-slate-600 px-2 py-2 rounded-md transition-transform"
+      onClick={()=>{
+        redo();
+      }}
+    >
+      <RefreshOutlined />
+    </button>
+  );
+}
+
 function Controls() {
   const {
     nextRound,
@@ -152,17 +182,21 @@ function Controls() {
     currentRound,
     totalRounds,
     currentPosition,
+    isLoading
   } = useCharaAnimeContext();
 
   return (
     <div className="flex gap-2 justify-center md:justify-between items-center">
-      <button
-        className="bg-sky-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
-        onClick={initGame}
-      >
-        <RestartAlt />
-        <span className="hidden md:flex md:ml-2">Reiniciar</span>
-      </button>
+      <div className="flex gap-2 flex-1">
+        <button
+          className="bg-sky-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
+          onClick={initGame}
+        >
+          <RestartAlt />
+          <span className="hidden md:flex md:ml-2">Reiniciar</span>
+        </button>
+        {isLoading && <ButtonReload />}
+      </div>
 
       <button
         onClick={nextRound}
