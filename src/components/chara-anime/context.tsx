@@ -111,7 +111,7 @@ export function CharaAnimeProvider({
   const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
-  const [currentPosition, setCurrentPosition] = useState<number>(0);
+  const [currentPosition, setCurrentPosition] = useState<number>(0);  
 
   const { animes: animesTotal, isLoading: isLoadingAnimes } = usePageContext();
 
@@ -123,6 +123,8 @@ export function CharaAnimeProvider({
   } = useGetCharactersToCharaAnime(animesTotal);
 
   const animes = useGetAnimeRelated(animesTotal, anime?.id);
+
+  console.log({animesTotal, anime, isLoadingAnimes, isLoadingCharacters, characters, animes});
 
   const startGame = () => {
     setCurrentRound(1);
@@ -231,7 +233,7 @@ export function CharaAnimeProvider({
       value={{
         characters: characters ?? [],
         animes,
-        isLoading: isLoadingAnimes,
+        isLoading: isLoadingAnimes || isLoadingCharacters,
         status,
         setStatus,
         redo: reload,
@@ -303,7 +305,7 @@ export function useGetCharactersToCharaAnime(
       isLoading ||
       isRefetching ||
       isFetching ||
-      charactersToReturn.length === 0,
+      charactersToReturn.length < 4,
   };
 }
 

@@ -101,7 +101,7 @@ function Round() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
-        {(status !== "loading" || isLoading) &&
+        {!isLoading &&
           characters.map((character, index) => (
             <CardCharacter
               key={index + "-" + character.character.malID}
@@ -111,10 +111,10 @@ function Round() {
               }}
               disabled={currentPosition !== index}
               position={index}
-              flip={status === "win-round" ? true : undefined}
+              flip={isLoading ? false :status === "win-round" ? true : undefined}
             />
           ))}
-        {(status === "loading" || characters.length === 0) &&
+        {isLoading &&
           Array(4)
             .fill(0)
             .map((_, index) => <CardCharacterSkeleton key={index} />)}
