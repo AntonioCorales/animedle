@@ -64,6 +64,7 @@ export type CharaAnimeContext = {
   selectedAnimes: SearchAnime[];
   numCorrects: number;
   startGame: () => void;
+  isLoadingCharacters: boolean;
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -93,6 +94,7 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   selectedAnimes: [],
   numCorrects: 0,
   startGame: () => {},
+  isLoadingCharacters: false,
 });
 
 export function CharaAnimeProvider({
@@ -233,7 +235,7 @@ export function CharaAnimeProvider({
       value={{
         characters: characters ?? [],
         animes,
-        isLoading: isLoadingAnimes || isLoadingCharacters,
+        isLoading: isLoadingAnimes,
         status,
         setStatus,
         redo: reload,
@@ -257,6 +259,7 @@ export function CharaAnimeProvider({
         selectedAnimes,
         numCorrects,
         startGame,
+        isLoadingCharacters,
       }}
     >
       {children}

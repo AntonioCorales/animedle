@@ -38,7 +38,7 @@ export default function CharaAnimeGame() {
 }
 
 function Init() {
-  const { startGame, setTotalRounds, isLoading } = useCharaAnimeContext();
+  const { startGame, setTotalRounds, isLoading, status } = useCharaAnimeContext();
   const [number, setNumber] = useState(10);
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
@@ -95,13 +95,15 @@ function Playing() {
 }
 
 function Round() {
-  const { characters, currentPosition, setCurrentPosition, status, isLoading } =
+  const { characters, currentPosition, setCurrentPosition, status, isLoading, isLoadingCharacters } =
     useCharaAnimeContext();
+
+  const isLoadingAny = isLoadingCharacters || isLoading;
 
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="characters grid grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center mx-auto">
-        {!isLoading &&
+        {!isLoadingAny &&
           characters.map((character, index) => (
             <CardCharacter
               key={index + "-" + character.character.malID}
@@ -114,7 +116,7 @@ function Round() {
               flip={isLoading ? false :status === "win-round" ? true : undefined}
             />
           ))}
-        {isLoading &&
+        {isLoadingAny &&
           Array(4)
             .fill(0)
             .map((_, index) => <CardCharacterSkeleton key={index} />)}
