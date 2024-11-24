@@ -278,7 +278,7 @@ export function useGetCharactersToCharaAnime(
       );
       setAnime(anime);
       if (!anime) return;
-      const characters = await mutateAsync(38891);
+      const characters = await mutateAsync(anime.idMal);
       const charactersToReturn = getRandomCharacters(characters ?? [], 4);
       if (charactersToReturn.length < 4) {
         console.log({ anime, characters, charactersToReturn });
