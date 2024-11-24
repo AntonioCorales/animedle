@@ -1,10 +1,11 @@
 import { CharacterData, CharacterResponse } from "@/types/characters";
-import { useQuery } from "@tanstack/react-query";
+
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 // const queryCharacterByAnimeId = `query QueryChar($animeId: Int)
 //    {
 //   Media(id: $animeId) {
-//     characters {      
+//     characters {
 //       nodes {
 //         id
 //         age
@@ -18,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 //         image {
 //           large
 //           medium
-//         }    
+//         }
 //         media {
 //           nodes {
 //             format
@@ -27,21 +28,34 @@ import { useQuery } from "@tanstack/react-query";
 //             }
 //           }
 //         }
-//       } 
+//       }
 //     }
 //   }
 // }`;
 
-export function useGetCharactersByAnimeIdMAL(animeId?: number) {
-  return useQuery<CharacterData[]>({
-    queryKey: ["characters", animeId],
-    queryFn: async () => {
-      const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}/characters`) ;
+// export function useGetCharactersByAnimeIdMAL(animeId?: number) {
+//   return useQuery<CharacterData[]>({
+//     queryKey: ["characters", animeId],
+//     queryFn: async () => {
+//       const response = await fetch(`https://api.jikan.moe/v4/anime/${animeId}/characters`) ;
+//       const { data } = await response.json() as CharacterResponse;
+
+//       return data;
+//     },
+//     enabled: !!animeId,
+//     refetchOnWindowFocus: false,
+//   });
+// }
+
+export function useGetCharactersByAnimeIdMAL() {
+  return useMutation({
+    mutationFn: async (animeId: number) => {
+      const response = await fetch(
+        `https://api.jikan.moe/v4/anime/${animeId}/characters`
+      );
       const { data } = await response.json() as CharacterResponse;
-      
+
       return data;
     },
-    enabled: !!animeId,
-    refetchOnWindowFocus: false,
   });
 }

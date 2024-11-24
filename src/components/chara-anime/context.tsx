@@ -126,15 +126,6 @@ export function CharaAnimeProvider({
 
   const animes = useGetAnimeRelated(animesTotal, anime?.id);
 
-  console.log({
-    animesTotal,
-    anime,
-    isLoadingAnimes,
-    isLoadingCharacters,
-    characters,
-    animes,
-  });
-
   const startGame = () => {
     setCurrentRound(1);
     setCurrentPosition(0);
@@ -273,46 +264,37 @@ export function useGetCharactersToCharaAnime(
 ) {
   const [anime, setAnime] = useState<SearchAnime | null>(null);
 
-  const {
-    data: charactersData,
-    isLoading,
-    isRefetching,
-    isFetching,
-    refetch,
-  } = useGetCharactersByAnimeIdMAL(anime?.idMal);
+  const { mutateAsync, isPending } = useGetCharactersByAnimeIdMAL();
 
   const [charactersToReturn, setCharactersToReturn] = useState<CharacterData[]>(
     []
   );
 
-  useEffect(() => {
-    if (isLoading || isRefetching || isFetching) return;
-    const charactersToReturn = getRandomCharacters(charactersData ?? [], 4);
-    if (charactersToReturn.length < 4) {
-      console.log({charactersToReturn});
-      refetch();
-    }
-
-    setCharactersToReturn(charactersToReturn);
-  }, [charactersData, isLoading, isRefetching, isFetching, refetch]);
-
   const redo = useCallback(
-    (alreadyShowed: number[] = []) => {
+    async (alreadyShowed: number[] = []) => {
       if (!animes) return;
       const anime = getRandomByArray(
         animes.filter((anime) => !alreadyShowed.includes(anime.id))
       );
-
       setAnime(anime);
+      if (!anime) return;
+      const characters = await mutateAsync(anime.idMal);
+      const charactersToReturn = getRandomCharacters(characters ?? [], 4);
+      if (charactersToReturn.length < 4) {
+        console.log({ anime, characters, charactersToReturn });
+        await redo(alreadyShowed);
+        return;
+      }
+      setCharactersToReturn(charactersToReturn);
     },
-    [animes]
+    [animes, mutateAsync]
   );
 
   return {
     characters: charactersToReturn,
     redo,
     anime,
-    isLoading: isLoading || isRefetching || isFetching,
+    isLoading: isPending,
   };
 }
 
