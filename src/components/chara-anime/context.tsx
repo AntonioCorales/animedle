@@ -113,7 +113,7 @@ export function CharaAnimeProvider({
   const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
-  const [currentPosition, setCurrentPosition] = useState<number>(0);  
+  const [currentPosition, setCurrentPosition] = useState<number>(0);
 
   const { animes: animesTotal, isLoading: isLoadingAnimes } = usePageContext();
 
@@ -126,7 +126,14 @@ export function CharaAnimeProvider({
 
   const animes = useGetAnimeRelated(animesTotal, anime?.id);
 
-  console.log({animesTotal, anime, isLoadingAnimes, isLoadingCharacters, characters, animes});
+  console.log({
+    animesTotal,
+    anime,
+    isLoadingAnimes,
+    isLoadingCharacters,
+    characters,
+    animes,
+  });
 
   const startGame = () => {
     setCurrentRound(1);
@@ -224,12 +231,6 @@ export function CharaAnimeProvider({
     redo(animesAlreadyShowed);
   }, [animesAlreadyShowed, redo]);
 
-  useEffect(() => {
-    if (isLoadingCharacters) return;
-    if (characters.length === 4) return;
-    reload();
-  }, [reload, characters, isLoadingCharacters]);
-
   return (
     <CharaAnimeContext.Provider
       value={{
@@ -277,6 +278,7 @@ export function useGetCharactersToCharaAnime(
     isLoading,
     isRefetching,
     isFetching,
+    refetch,
   } = useGetCharactersByAnimeIdMAL(anime?.idMal);
 
   const [charactersToReturn, setCharactersToReturn] = useState<CharacterData[]>(
@@ -284,9 +286,15 @@ export function useGetCharactersToCharaAnime(
   );
 
   useEffect(() => {
+    if (isLoading || isRefetching || isFetching) return;
     const charactersToReturn = getRandomCharacters(charactersData ?? [], 4);
+    if (charactersToReturn.length < 4) {
+      console.log({charactersToReturn});
+      refetch();
+    }
+
     setCharactersToReturn(charactersToReturn);
-  }, [charactersData]);
+  }, [charactersData, isLoading, isRefetching, isFetching, refetch]);
 
   const redo = useCallback(
     (alreadyShowed: number[] = []) => {
@@ -304,11 +312,7 @@ export function useGetCharactersToCharaAnime(
     characters: charactersToReturn,
     redo,
     anime,
-    isLoading:
-      isLoading ||
-      isRefetching ||
-      isFetching ||
-      charactersToReturn.length < 4,
+    isLoading: isLoading || isRefetching || isFetching,
   };
 }
 
@@ -316,7 +320,7 @@ function getRandomCharacters(charactersData: CharacterData[], X: number) {
   const characters = charactersData.filter((char) => {
     return (
       !char.character.images.jpg.image_url.includes("questionmark") &&
-      !char.character.images.jpg.image_url.includes("questionmark")
+      !char.character.images.webp.image_url.includes("questionmark")
     );
   });
   const supportingCharacters = characters.filter(
