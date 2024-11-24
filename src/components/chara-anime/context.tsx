@@ -278,7 +278,7 @@ export function useGetCharactersToCharaAnime(
       );
       setAnime(anime);
       if (!anime) return;
-      const characters = await mutateAsync(anime.idMal);
+      const characters = await mutateAsync(38891);
       const charactersToReturn = getRandomCharacters(characters ?? [], 4);
       if (charactersToReturn.length < 4) {
         console.log({ anime, characters, charactersToReturn });
@@ -299,6 +299,7 @@ export function useGetCharactersToCharaAnime(
 }
 
 function getRandomCharacters(charactersData: CharacterData[], X: number) {
+  if (charactersData.length < X) return [];
   const characters = charactersData.filter((char) => {
     return (
       !char.character.images.jpg.image_url.includes("questionmark") &&
@@ -310,8 +311,22 @@ function getRandomCharacters(charactersData: CharacterData[], X: number) {
   );
   const mainCharacters = characters.filter((char) => char.role === "Main");
 
-  if (supportingCharacters.length < X - 1 || mainCharacters.length < 1) {
-    return [];
+  if (supportingCharacters.length < X - 1 ) {    
+    if(mainCharacters.length < X - supportingCharacters.length) return [];
+    const characterToReturn: CharacterData[] = supportingCharacters;
+    let tries = 0;
+    while (characterToReturn.length < X && tries < 10) {      
+      const characterData = getRandomByArray(mainCharacters)
+      if(!characterData) continue;
+      if (!characterToReturn.some((char) => char.character.mal_id === characterData.character.mal_id)) {
+        characterToReturn.push(characterData);
+      }      
+      tries++
+    }
+    characterToReturn.sort((a, b) => a.favorites - b.favorites);
+    if(characterToReturn.length < X) return [];
+    return characterToReturn;
+   
   }
 
   // Ordenar los Supporting Characters por favoritos

@@ -17,7 +17,7 @@ type CharacterImage = {
   }
 
 export type Character = {
-  malID: number;
+  mal_id: number;
   url: string;
   images: CharacterImage;
   name: string;
@@ -34,7 +34,7 @@ export type VoiceActor = {
 };
 
 export type Person = {
-  malID: number;
+  mal_id: number;
   url: string;
   images: Images;
   name: string;
@@ -45,7 +45,7 @@ export type Jpg = {
 };
 
 export type CharacterDetails = {
-  malID: number;
+  mal_id: number;
   url: string;
   images: CharacterImage;
   name: string;
@@ -64,7 +64,7 @@ export type AnimeElement = {
 };
 
 export type MangaClass = {
-  malID: number;
+  mal_id: number;
   url: string;
   images: { [key: string]: AnimeImage };
   title: string;
