@@ -4,7 +4,8 @@ import "./globals.css";
 import { QueryProvider } from "@/lib/query/QueryProvider";
 import { ApolloWrapper } from "@/lib/apollo/ApolloWrapper";
 import Link from "next/link";
-import { PageProvider } from "@/components/context";
+import { PageProvider, usePageContext } from "@/components/context";
+import OptionsMenu from "@/components/elements/Settings";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,7 +37,7 @@ export default function RootLayout({
           <ApolloWrapper>
             <PageProvider>
               <header className="px-2 md:px-0 w-full flex flex-row justify-center items-center gap-2 text-xs text-slate-400 text-center bg-gray-900 py-2">
-                <div className="m-auto w-full max-w-lg flex flex-col lg:flex-row lg:justify-between lg:max-w-screen-lg ">
+                <div className="m-auto w-full max-w-lg flex flex-row justify-between lg:flex-row lg:justify-between lg:max-w-screen-lg ">
                   <div className="flex flex-row gap-4 items-center">
                     <Link href={"/"} className="hover:text-sky-400">
                       AnimeDle
@@ -51,6 +52,9 @@ export default function RootLayout({
                       AniCover
                     </Link>
                   </div>
+                  <div>
+                    <OptionsMenu />
+                  </div>
                 </div>
               </header>
               <div className="max-w-screen-lg px-4 m-auto py-5 flex flex-col"
@@ -63,7 +67,7 @@ export default function RootLayout({
               <footer className="w-full flex flex-row justify-center items-center gap-2 text-xs text-slate-100 text-center bg-gray-900 py-1">
                 <div className="m-auto w-full max-w-lg flex flex-col lg:flex-row lg:justify-between lg:max-w-screen-lg items-center">
                   <span>Desarrollado por: Kkuuhaku</span>
-                  <span>Versión: 1.3.1</span>
+                  <span>Versión: 1.3.2</span>
                   <div className="flex flex-col gap-1 items-end">
                     <span className="text-right ">
                       Contiene datos de la lista de{" "}
@@ -106,3 +110,4 @@ export default function RootLayout({
     </html>
   );
 }
+

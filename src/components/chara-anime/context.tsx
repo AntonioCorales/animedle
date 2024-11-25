@@ -115,7 +115,7 @@ export function CharaAnimeProvider({
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
 
-  const { animes: animesTotal, isLoading: isLoadingAnimes } = usePageContext();
+  const { animes: animesTotal, isLoading: isLoadingAnimes, allAnimes } = usePageContext();
 
   const {
     characters,
@@ -124,7 +124,7 @@ export function CharaAnimeProvider({
     anime,
   } = useGetCharactersToCharaAnime(animesTotal);
 
-  const animes = useGetAnimeRelated(animesTotal, anime?.id);
+  const animes = useGetAnimeRelated(allAnimes, anime?.id);
 
   const startGame = () => {
     setCurrentRound(1);

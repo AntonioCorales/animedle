@@ -1,4 +1,9 @@
-import { ListName, MediaListCollection, NodesStudio } from "@/types/anime";
+import {
+  Entry,
+  ListName,
+  MediaListCollection,
+  NodesStudio,
+} from "@/types/anime";
 import { SearchAnime } from "../game/context";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { getRandomByArray } from "./functions";
@@ -14,6 +19,59 @@ const DEFAULT_OPTIONS = {
   types: ["Completed"],
 };
 
+export function entryToSearchAnime(entry: Entry, tagsLimit?: number): SearchAnime {
+  const { media } = entry;
+  const altNames = [
+    media.title.romaji.toLowerCase(),
+    ...media.synonyms.map((s) => s.toLowerCase()),
+  ];
+
+  if (media.title.english) {
+    altNames.push(media.title.english.toLowerCase());
+    altNames.push(media.title.english);
+  }
+
+  const tags =
+    tagsLimit && tagsLimit > 0
+      ? media.tags.map((tag) => tag.name).slice(0, tagsLimit)
+      : media.tags.map((tag) => tag.name);
+
+  const studios: NodesStudio[] = [];
+  media.studios.nodes.forEach((studio) => {
+    if (studio.isAnimationStudio) {
+      if (studios.findIndex((s) => s.id === studio.id) === -1) {
+        studios.push(studio);
+      }
+    }
+  });
+
+  return {
+    id: media.id,
+    idMal: media.idMal,
+    name: media.title.romaji,
+    englishName: media.title.english,
+    altNames,
+    image: media.coverImage.large,
+    genres: media.genres,
+    tags,
+    episodes: media.episodes,
+    seasonYear: media.seasonYear,
+    format: media.format,
+    season: media.season,
+    description: media.description,
+    image_large: media.coverImage.extraLarge,
+    studios,
+    relations: media.relations.nodes.map((node) => {
+      return {
+        id: node.id,
+        idMal: node.idMal,
+        name: node.title.romaji,
+        englishName: node.title.english,
+      };
+    }),
+  };
+}
+
 export function formatAnimes(
   animes?: MediaListCollection,
   options?: FormatAnimesOptions
@@ -21,65 +79,22 @@ export function formatAnimes(
   if (!animes) return [];
   const { types = DEFAULT_OPTIONS.types, tagsLimit } = options || {};
   if (types.length === 0) return [];
-  const listAnimes = animes.lists.find((list) => {
+  const listsAnimes = animes.lists.filter((list) => {
     return types.includes(list.name);
   });
-  if (!listAnimes) return [];
 
-  return listAnimes.entries.map((entry) => {
-    const { media } = entry;
-    const altNames = [
-      media.title.romaji.toLowerCase(),
-      ...media.synonyms.map((s) => s.toLowerCase()),
-    ];
-
-    if (media.title.english) {
-      altNames.push(media.title.english.toLowerCase());
-      altNames.push(media.title.english);
-    }
-
-    const tags =
-      tagsLimit && tagsLimit > 0
-        ? media.tags.map((tag) => tag.name).slice(0, tagsLimit)
-        : media.tags.map((tag) => tag.name);
-
-    const studios: NodesStudio[] = []
-    media.studios.nodes.forEach((studio) => {
-      if (studio.isAnimationStudio) {
-        if(studios.findIndex((s) => s.id === studio.id) === -1) {
-          studios.push(studio);
-        }
-      }
+  const dataToReturn: SearchAnime[] = [];
+  listsAnimes.forEach((list) => {
+    const listAnimes = list.entries.map((entry) => {
+      return entryToSearchAnime(entry, tagsLimit);
     });
-
-
-    return {
-      id: media.id,
-      idMal: media.idMal,
-      name: media.title.romaji,
-      englishName: media.title.english,
-      altNames,
-      image: media.coverImage.large,
-      genres: media.genres,
-      tags,
-      episodes: media.episodes,
-      seasonYear: media.seasonYear,
-      format: media.format,
-      season: media.season,
-      description: media.description,
-      image_large: media.coverImage.extraLarge,
-      studios,
-      relations: media.relations.nodes.map((node) => {
-        return {
-          id: node.id,
-          idMal: node.idMal,
-          name: node.title.romaji,
-          englishName: node.title.english
-        }
-      })
-    };
+    dataToReturn.push(...listAnimes);
   });
+
+  return dataToReturn;
 }
+
+
 
 export function useGetAndFormatAnimes(
   user: string,
@@ -91,6 +106,7 @@ export function useGetAndFormatAnimes(
   return {
     animes,
     isLoading,
+    allAnimes: data?.lists.flatMap((list) => list.entries.map((entry) => entryToSearchAnime(entry))) ?? [],
   };
 }
 
@@ -105,10 +121,10 @@ export function useGetAndFormatRandomAnime(
 
   useEffect(() => {
     const animes = formatAnimes(data);
-    
+
     const filteredAnimes = animes.filter((anime) => {
       if (excludeAnimes.length === 0) return true;
-      return !excludeAnimes.includes(anime.id)
+      return !excludeAnimes.includes(anime.id);
     });
     const randomAnime = getRandomByArray(filteredAnimes);
     if (randomAnime) {

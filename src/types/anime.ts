@@ -16,7 +16,7 @@ export type ResponseAnimeByUser = {
   MediaListCollection: MediaListCollection;
 };
 
-export type ListName = "Completed" | "Watching" | "Dropped" | "Paused";
+export type ListName = "Completed" | "Watching" | "Dropped" | "Paused" | "Planning"; 
 
 export type List = {
   name: ListName;

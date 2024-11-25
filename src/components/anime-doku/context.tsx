@@ -3,6 +3,7 @@ import { SearchAnime } from "../game/context";
 
 export type NumberOperator = "lt" | "lte" | "gt" | "gte" | "eq" | "neq";
 export type StringOperator = "contains" | "notContains";
+export type OptionType = "year" | "genre" | "tag" | "format" | "chapters";
 
 export type OptionLine =
   | {

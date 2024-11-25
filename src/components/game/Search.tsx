@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import InputSearch from "../server-views/InputSearch";
-import { SearchAnime, useGameContext } from "./context";
+import { SearchAnime } from "./context";
 import { CloseOutlined } from "@mui/icons-material";
-import { usePageContext } from "../context";
+import { LIST_NAMES, usePageContext } from "../context";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, FormatAnimesOptions } from "../utils/useGetAnime";
 
@@ -19,14 +19,13 @@ export default function SearchAnimeSelect(props: SearchProps) {
     excludeAnimes = [],
     hideImage,
   } = props;
-  const { user } = usePageContext();
+  const { user, listNames } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
 
   const [animes, setAnimes] = useState<SearchAnime[]>([]);
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [disabledA, setDisabled] = useState(false);
 
   const filteredAnimes = useFilteredAnimes(excludeAnimes, animes, search);
 
@@ -50,11 +49,13 @@ export default function SearchAnimeSelect(props: SearchProps) {
     [onSelect, search]
   );
 
-  useEffect(() => {
-    
-    const animes = formatAnimes(data, formatOptions);
+  useEffect(() => {    
+    const animes = formatAnimes(data, {
+      ...formatOptions,
+      types: LIST_NAMES,
+    });
     setAnimes(animes);
-  }, [data, formatOptions]);
+  }, [data, formatOptions, listNames]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
