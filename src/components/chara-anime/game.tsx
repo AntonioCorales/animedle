@@ -106,7 +106,7 @@ function Round() {
         {!isLoadingAny &&
           characters.map((character, index) => (
             <CardCharacter
-              key={index + "-" + character.character.malID}
+              key={index + "-" + character.character.mal_id}
               characterData={character}
               onClick={() => {
                 if (currentPosition === index) setCurrentPosition(index + 1);
