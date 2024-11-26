@@ -11,6 +11,7 @@ import { usePageContext } from "../context";
 import { SearchAnime } from "../game/context";
 import { useGetAnimeRelated } from "../utils/useGetAnimeRelated";
 import { getRandomByArray } from "../utils/functions";
+import useStorage from "../useStorage";
 
 type CharaAnimeStatus =
   | "loading"
@@ -22,6 +23,8 @@ type CharaAnimeStatus =
   | "win-round"
   | "error-round"
   | "show-names";
+
+export type CharaAnimeGameMode = "classic" | "hardcore" | "endless";
 
 type RoundData = {
   animes: MinAnimeData[];
@@ -38,6 +41,7 @@ type MinAnimeData = {
 };
 
 export type CharaAnimeContext = {
+  anime: SearchAnime | null;
   animes: MinAnimeData[];
   characters: CharacterData[];
   isLoading: boolean;
@@ -51,7 +55,6 @@ export type CharaAnimeContext = {
   rounds: RoundData[];
   totalPoints: number;
   addPoints: (points: number) => void;
-  time: number;
   animesAlreadyShowed: number[];
   addAnime: (anime: SearchAnime) => boolean;
   winGame: () => void;
@@ -65,6 +68,8 @@ export type CharaAnimeContext = {
   numCorrects: number;
   startGame: () => void;
   isLoadingCharacters: boolean;
+  gameMode: CharaAnimeGameMode;
+  setGameMode: (mode: CharaAnimeGameMode) => void;
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -81,7 +86,6 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   rounds: [],
   totalPoints: 0,
   addPoints: () => {},
-  time: 0,
   animesAlreadyShowed: [],
   addAnime: () => false,
   winGame: () => {},
@@ -95,6 +99,9 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   numCorrects: 0,
   startGame: () => {},
   isLoadingCharacters: false,
+  gameMode: "classic",
+  setGameMode: () => {},
+  anime: null,
 });
 
 export function CharaAnimeProvider({
@@ -107,13 +114,17 @@ export function CharaAnimeProvider({
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [rounds, setRounds] = useState<RoundData[]>([]);
   const [totalPoints, setTotalPoints] = useState<number>(0);
-  const [time, setTime] = useState<number>(0);
   const [animesAlreadyShowed, setAnimesAlreadyShowed] = useState<number[]>([]);
   const [numCharacters, setNumCharacters] = useState(4);
   const [numCorrects, setNumCorrects] = useState(0);
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
+
+  const [gameMode, setGameMode] = useStorage<CharaAnimeGameMode>(
+    "charaAnime-gameMode",
+    "classic"
+  );
 
   const { animes: animesTotal, isLoading: isLoadingAnimes, allAnimes } = usePageContext();
 
@@ -156,6 +167,7 @@ export function CharaAnimeProvider({
   };
 
   const addAnime = (anime: SearchAnime) => {
+    if(status === "show-names") return false;
     const newSelectedAnimes = [anime, ...selectedAnimes];
     setSelectedAnimes(newSelectedAnimes);
     if (
@@ -184,7 +196,14 @@ export function CharaAnimeProvider({
 
       setStatus("win-round");
       return true;
-    }
+    } else if (gameMode === "hardcore") {
+      if(currentPosition === 4) {
+        setStatus("show-names");
+        return false;
+      }
+      setCurrentPosition((prev) => prev + 1);
+
+    } 
     setStatus("error-round");
     return false;
   };
@@ -194,7 +213,8 @@ export function CharaAnimeProvider({
   };
 
   const nextRound = () => {
-    const alreadyShowed = [...animesAlreadyShowed, ...animes.map((a) => a.id)];
+    if(!anime) return;
+    const alreadyShowed = [...animesAlreadyShowed, anime.id];
     setAnimesAlreadyShowed(alreadyShowed);
     if (selectedAnimes.length === 0 && currentRound > 0) {
       setRounds((prev) => [
@@ -222,6 +242,10 @@ export function CharaAnimeProvider({
     redo(animesAlreadyShowed);
   }, [animesAlreadyShowed, redo]);
 
+  useEffect(() => {
+    if(totalRounds > animesTotal.length) setTotalRounds(animesTotal.length);
+  }, [totalRounds, animesTotal])
+
   return (
     <CharaAnimeContext.Provider
       value={{
@@ -238,7 +262,6 @@ export function CharaAnimeProvider({
         rounds,
         totalPoints,
         addPoints,
-        time,
         animesAlreadyShowed,
         addAnime,
         winGame,
@@ -252,6 +275,9 @@ export function CharaAnimeProvider({
         numCorrects,
         startGame,
         isLoadingCharacters,
+        gameMode,
+        setGameMode,
+        anime,
       }}
     >
       {children}

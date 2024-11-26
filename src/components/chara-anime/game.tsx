@@ -1,5 +1,5 @@
 import { SubtitleStyles, TitleStyles } from "../common";
-import { useCharaAnimeContext } from "./context";
+import { CharaAnimeGameMode, useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
 import FlipCard from "./FlipCard";
 import { useEffect, useState } from "react";
@@ -14,6 +14,8 @@ import {
 } from "@mui/icons-material";
 import { SearchAnime } from "../game/context";
 import styled from "styled-components";
+import useStorage from "../useStorage";
+import ButtonGameMode from "./elements/ButtonGameMode";
 
 export default function CharaAnimeGame() {
   const { status } = useCharaAnimeContext();
@@ -38,26 +40,56 @@ export default function CharaAnimeGame() {
 }
 
 function Init() {
-  const { startGame, setTotalRounds, isLoading, status } = useCharaAnimeContext();
-  const [number, setNumber] = useState(10);
+  const { startGame, setTotalRounds, isLoading, setGameMode, gameMode } =
+    useCharaAnimeContext();
+  const [newTotalRounds, setNewTotalRounds] = useStorage(
+    "charaAnime-totalRounds",
+    10
+  );
+
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
-      <label className="flex flex-col gap-1 text-center">
-        Número de rondas
-        <input
-          type="number"
-          defaultValue={number}
-          placeholder="Ingresa el número de rondas"
-          className="bg-slate-800 text-white px-4 py-2 rounded-md focus:outline-none w-[300px] border-green-800 border-2 text-center"
-          onChange={(e) => {
-            setNumber(parseInt(e.target.value));
+      <div className="flex gap-2 justify-center items-center">
+        <ButtonGameMode
+          isSelected={gameMode === "classic"}
+          className="flex-1"
+          onClick={() => {
+            setGameMode("classic");
           }}
-        />
-      </label>
+        >
+          Clásico
+        </ButtonGameMode>
+        <ButtonGameMode
+          isSelected={gameMode === "hardcore"}
+          className="flex-1"
+          onClick={() => {
+            setGameMode("hardcore");
+          }}
+        >
+          Hardcore
+        </ButtonGameMode>
+      </div>
+
+      {gameMode !== "endless" && (
+        <label className="flex flex-col gap-1 text-center">
+          Número de rondas
+          <input
+            type="number"
+            defaultValue={newTotalRounds}
+            placeholder="Ingresa el número de rondas"
+            className="bg-slate-800 text-white px-4 py-2 rounded-md focus:outline-none w-[300px] border-green-800 border-2 text-center"
+            onChange={(e) => {
+              setNewTotalRounds(parseInt(e.target.value));
+            }}
+          />
+        </label>
+      )}
+
       <button
         disabled={isLoading}
         onClick={() => {
-          setTotalRounds(number > 0 ? number : 1);
+          setNewTotalRounds(newTotalRounds);
+          setTotalRounds(newTotalRounds > 0 ? newTotalRounds : 1);
           startGame();
         }}
         className="bg-green-800 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
@@ -76,7 +108,7 @@ function Playing() {
     <div className="flex flex-col gap-4">
       <SearchAnimeSelect
         onSelect={addAnime}
-        disabled={isLoading || status === "win-round"}
+        disabled={isLoading || status === "win-round" || status === "show-names"}
         className={`${
           status === "win-round"
             ? " outline-green-500 outline-2 disabled:outline-2"
@@ -95,8 +127,15 @@ function Playing() {
 }
 
 function Round() {
-  const { characters, currentPosition, setCurrentPosition, status, isLoading, isLoadingCharacters } =
-    useCharaAnimeContext();
+  const {
+    characters,
+    currentPosition,
+    setCurrentPosition,
+    status,
+    isLoading,
+    isLoadingCharacters,
+    gameMode,
+  } = useCharaAnimeContext();
 
   const isLoadingAny = isLoadingCharacters || isLoading;
 
@@ -113,7 +152,15 @@ function Round() {
               }}
               disabled={currentPosition !== index}
               position={index}
-              flip={isLoading ? false :status === "win-round" ? true : undefined}
+              flip={
+                isLoading
+                  ? false
+                  : gameMode === "hardcore" && currentPosition === index + 1
+                  ? true
+                  : status === "win-round"
+                  ? true
+                  : undefined
+              }
             />
           ))}
         {isLoadingAny &&
@@ -166,8 +213,9 @@ function ButtonReload() {
 
   if (counter < 2) return null;
   return (
-    <button className="hover:scale-105 bg-slate-600 px-2 py-2 rounded-md transition-transform"
-      onClick={()=>{
+    <button
+      className="hover:scale-105 bg-slate-600 px-2 py-2 rounded-md transition-transform"
+      onClick={() => {
         redo();
       }}
     >
@@ -184,7 +232,9 @@ function Controls() {
     currentRound,
     totalRounds,
     currentPosition,
-    isLoading
+    gameMode,
+    isLoading,
+    setStatus
   } = useCharaAnimeContext();
 
   return (
@@ -200,25 +250,45 @@ function Controls() {
         {isLoading && <ButtonReload />}
       </div>
 
-      <button
-        onClick={nextRound}
-        disabled={status !== "win-round" && currentPosition !== 4}
-        className="flex bg-green-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
-      >
-        <span className="hidden md:flex md:mr-2">
-          {currentRound === totalRounds
-            ? "Finalizar"
-            : status === "win-round"
-            ? "Siguiente"
-            : "Pasar"}
-        </span>
-        <ArrowRightAlt />
-      </button>
+      <div className="flex gap-2 flex-1 lg:justify-end">
+        <button
+          disabled={
+            status === "show-names" || status === "win-round" ||
+            currentPosition !== 4
+          }
+          onClick={() => {
+            setStatus("show-names");
+          }}
+          className="flex bg-green-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+        >
+          Ver respuesta
+        </button>
+        <button
+          onClick={nextRound}
+          disabled={
+            status !== "win-round" && (gameMode === "classic"
+              ? currentPosition !== 4
+              : gameMode === "hardcore"
+              ? currentPosition !== 4
+              : false)
+          }
+          className="flex bg-green-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
+        >
+          <span className="hidden md:flex md:mr-2">
+            {currentRound === totalRounds
+              ? "Finalizar"
+              : status === "win-round"
+              ? "Siguiente"
+              : "Pasar"}
+          </span>
+          <ArrowRightAlt />
+        </button>
+      </div>
     </div>
   );
 }
 
-function precisionToClass(precision: number) {
+export function precisionToClass(precision: number) {
   if (precision <= 25) return "text-red-400";
   if (precision <= 50) return "text-orange-400";
   if (precision <= 75) return "text-yellow-400";
@@ -289,7 +359,9 @@ function precisionToText(
     true: [
       "¡¡ERES DIOS, ¿¿PERO TANTO ESFUERZO VALIÓ LA PENA??!!",
       '"Ya era hora que hicieseis todo bien, no cuesta tanto." -Rodri12721',
-      "Increíble! Lo alcanzaste, ¿Cuantas neuronas sacrificaste?",
+      "¡Increíble! Lo alcanzaste, ¿Cuantas neuronas sacrificaste?",
+      "Todo este vicio, para este resultado... ¿Felicidades?",
+      "Ni Cell hubiera logrado tanta perfección.",
     ],
     false: [
       "NADA, ERES BUENÍSIMO. ¿PERO LA PRECISIÓN PARA CUANDO?",
@@ -441,10 +513,11 @@ function CardCharacterSkeleton() {
 }
 
 function AnimesSelected() {
-  const { selectedAnimes } = useCharaAnimeContext();
+  const { selectedAnimes, status, anime, gameMode } = useCharaAnimeContext();
 
   return (
     <div className="flex flex-col gap-2">
+      {status === "show-names" && anime && <AnimeSelectedCard anime={anime} />}
       {selectedAnimes.map((selectedAnime) => (
         <AnimeSelectedCard
           key={selectedAnime.name + selectedAnime.id}

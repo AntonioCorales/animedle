@@ -5,6 +5,8 @@ import { useCounterContext } from "../game/counter-context";
 import { type Quiz, useAniQuizContext } from "./context";
 import ConfettiExplosion from "react-confetti";
 import styled from "styled-components";
+import { precisionToClass } from "../chara-anime/game";
+import useStorage from "../useStorage";
 
 export default function AniQuizGame() {
   const { status } = useAniQuizContext();
@@ -221,7 +223,7 @@ function TimerBar() {
 }
 
 function Start() {
-  const [number, setNumber] = useState(10);
+  const [number, setNumber] = useStorage("aniQuiz-totalRounds", 10);
   const { startGame } = useAniQuizContext();
   const { reset } = useCounterContext();
   return (
@@ -240,6 +242,7 @@ function Start() {
       </label>
       <button
         onClick={() => {
+          setNumber(number)
           startGame(number);
           reset();
         }}
@@ -256,9 +259,15 @@ function End() {
 
   const maxPoints = totalQuiz * 100;
 
+  const percent = totalPoints / maxPoints * 100;
+
+  const classPoints = precisionToClass(percent);
+
+  const isPerfect = totalPoints === maxPoints;
+
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
-      {totalPoints > 0 && (
+      {percent > 20 && (
         <ConfettiExplosion
           style={{
             zIndex: 1000,
@@ -268,11 +277,13 @@ function End() {
           }}
         />
       )}
-      <span className={"text-2xl"}>{"¡Finalizado!"}</span>
+      <span className={"text-2xl"}>¡Finalizado!</span>
 
-      <span>
+      <span className={`text-lg leading-5 ${classPoints} relative leading-5`}>
         Has obtenido {totalPoints} de {maxPoints} puntos
       </span>
+
+      {isPerfect && <span className="text-lg text-sky-400">¡Puntuación perfecta!</span>}
 
       <button
         className="bg-green-700 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
