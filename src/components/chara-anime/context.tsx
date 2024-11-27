@@ -121,10 +121,7 @@ export function CharaAnimeProvider({
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [currentPosition, setCurrentPosition] = useState<number>(0);
 
-  const [gameMode, setGameMode] = useStorage<CharaAnimeGameMode>(
-    "charaAnime-gameMode",
-    "classic"
-  );
+  const [gameMode, setGameMode] = useState<CharaAnimeGameMode>("classic");
 
   const { animes: animesTotal, isLoading: isLoadingAnimes, allAnimes } = usePageContext();
 

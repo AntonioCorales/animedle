@@ -46,24 +46,30 @@ function Init() {
     "charaAnime-totalRounds",
     10
   );
+  const [newGameMode, setNewGameMode] = useStorage<CharaAnimeGameMode>(
+    "charaAnime-gameMode",
+    "classic"
+  );
 
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
       <div className="flex gap-2 justify-center items-center">
         <ButtonGameMode
-          isSelected={gameMode === "classic"}
+          isSelected={newGameMode === "classic"}
           className="flex-1"
           onClick={() => {
             setGameMode("classic");
+            setNewGameMode("classic");
           }}
         >
           Clásico
         </ButtonGameMode>
         <ButtonGameMode
-          isSelected={gameMode === "hardcore"}
+          isSelected={newGameMode === "hardcore"}
           className="flex-1"
           onClick={() => {
             setGameMode("hardcore");
+            setNewGameMode("hardcore");
           }}
         >
           Hardcore
