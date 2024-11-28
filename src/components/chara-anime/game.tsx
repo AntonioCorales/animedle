@@ -1,3 +1,5 @@
+"use client";
+
 import { SubtitleStyles, TitleStyles } from "../common";
 import { CharaAnimeGameMode, useCharaAnimeContext } from "./context";
 import { CharacterData } from "@/types/characters";
@@ -16,9 +18,11 @@ import { SearchAnime } from "../game/context";
 import styled from "styled-components";
 import useStorage from "../useStorage";
 import ButtonGameMode from "./elements/ButtonGameMode";
+import { EndlessEnd, RecordBar, RecordEndless, TimerBar } from "./endless";
+import { useCounterContext } from "../game/counter-context";
 
 export default function CharaAnimeGame() {
-  const { status } = useCharaAnimeContext();
+  const { status, gameMode } = useCharaAnimeContext();
 
   return (
     <div className="flex flex-col gap-4 flex-1">
@@ -34,7 +38,13 @@ export default function CharaAnimeGame() {
         status === "error-round" ||
         status === "show-names" ||
         status === "loading") && <Playing />}
-      {status === "end" && <End />}
+
+      {status === "end" && (
+        <>
+          {gameMode === "endless" && <EndlessEnd />}
+          {gameMode !== "endless" && <End />}
+        </>
+      )}
     </div>
   );
 }
@@ -51,6 +61,10 @@ function Init() {
     "classic"
   );
 
+  useEffect(() => {
+    setGameMode(newGameMode);
+  }, [newGameMode, setGameMode]);
+
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
       <div className="flex gap-2 justify-center items-center">
@@ -58,7 +72,6 @@ function Init() {
           isSelected={newGameMode === "classic"}
           className="flex-1"
           onClick={() => {
-            setGameMode("classic");
             setNewGameMode("classic");
           }}
         >
@@ -68,11 +81,19 @@ function Init() {
           isSelected={newGameMode === "hardcore"}
           className="flex-1"
           onClick={() => {
-            setGameMode("hardcore");
             setNewGameMode("hardcore");
           }}
         >
           Hardcore
+        </ButtonGameMode>
+        <ButtonGameMode
+          isSelected={newGameMode === "endless"}
+          className="flex-1"
+          onClick={() => {
+            setNewGameMode("endless");
+          }}
+        >
+          Endless
         </ButtonGameMode>
       </div>
 
@@ -91,11 +112,17 @@ function Init() {
         </label>
       )}
 
+      {gameMode === "endless" && <RecordEndless />}
       <button
         disabled={isLoading}
         onClick={() => {
           setNewTotalRounds(newTotalRounds);
-          setTotalRounds(newTotalRounds > 0 ? newTotalRounds : 1);
+          if (gameMode === "endless") {
+            setTotalRounds(1);
+          } else {
+            setTotalRounds(newTotalRounds > 0 ? newTotalRounds : 1);
+          }
+
           startGame();
         }}
         className="bg-green-800 text-white px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none"
@@ -107,14 +134,19 @@ function Init() {
 }
 
 function Playing() {
-  const { isLoading, addAnime, status, selectedAnimes } =
+  const { isLoading, addAnime, status, selectedAnimes, gameMode } =
     useCharaAnimeContext();
 
   return (
     <div className="flex flex-col gap-4">
       <SearchAnimeSelect
         onSelect={addAnime}
-        disabled={isLoading || status === "win-round" || status === "show-names"}
+        disabled={
+          isLoading ||
+          status === "win-round" ||
+          status === "show-names" ||
+          (status === "error-round" && gameMode === "endless")
+        }
         className={`${
           status === "win-round"
             ? " outline-green-500 outline-2 disabled:outline-2"
@@ -125,7 +157,9 @@ function Playing() {
         excludeAnimes={selectedAnimes.map((anime) => anime.id)}
       />
       <Stats />
+      {gameMode === "endless" && <TimerBar />}
       <Round />
+      {gameMode === "endless" && <RecordBar />}
       <Controls />
       <AnimesSelected />
     </div>
@@ -165,7 +199,7 @@ function Round() {
                   ? true
                   : status === "win-round"
                   ? true
-                  : undefined
+                  : status === "show-names"
               }
             />
           ))}
@@ -179,13 +213,17 @@ function Round() {
 }
 
 function Stats() {
-  const { totalRounds, currentRound, totalPoints, status } =
+  const { totalRounds, currentRound, totalPoints, status, gameMode } =
     useCharaAnimeContext();
   return (
     <div className="flex flex-row gap-2 items-end justify-between">
-      <span className="text-green-300">
-        Ronda: {currentRound}/{totalRounds}
-      </span>
+      {gameMode !== "endless" ? (
+        <span className="text-green-300">
+          Ronda: {currentRound}/{totalRounds}
+        </span>
+      ) : (
+        <span className="text-green-300">Ronda: {currentRound}</span>
+      )}
       {status === "win-round" && (
         <AnimationPulseStyles>
           <span className="text-green-300 text-xl leading-4">
@@ -240,15 +278,20 @@ function Controls() {
     currentPosition,
     gameMode,
     isLoading,
-    setStatus
+    setStatus,
   } = useCharaAnimeContext();
+
+  const { reset } = useCounterContext();
 
   return (
     <div className="flex gap-2 justify-center md:justify-between items-center">
       <div className="flex gap-2 flex-1">
         <button
           className="bg-sky-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none flex"
-          onClick={initGame}
+          onClick={() => {
+            reset();
+            initGame();
+          }}
         >
           <RestartAlt />
           <span className="hidden md:flex md:ml-2">Reiniciar</span>
@@ -259,8 +302,13 @@ function Controls() {
       <div className="flex gap-2 flex-1 lg:justify-end">
         <button
           disabled={
-            status === "show-names" || status === "win-round" ||
-            currentPosition !== 4
+            gameMode === "endless"
+              ? status === "win-round" ||
+                (status !== "error-round" && currentPosition !== 4) ||
+                status === "show-names"
+              : status === "show-names" ||
+                status === "win-round" ||
+                currentPosition !== 4
           }
           onClick={() => {
             setStatus("show-names");
@@ -270,18 +318,31 @@ function Controls() {
           Ver respuesta
         </button>
         <button
-          onClick={nextRound}
+          onClick={() => {
+            reset();
+            nextRound();
+          }}
           disabled={
-            status !== "win-round" && (gameMode === "classic"
-              ? currentPosition !== 4
-              : gameMode === "hardcore"
-              ? currentPosition !== 4
-              : false)
+            gameMode === "endless"
+              ? status !== "win-round" &&
+                status !== "error-round" &&
+                status !== "show-names" &&
+                currentPosition !== 4
+              : status !== "win-round" &&
+                (gameMode === "classic"
+                  ? currentPosition !== 4
+                  : gameMode === "hardcore"
+                  ? currentPosition !== 4
+                  : false)
           }
           className="flex bg-green-700 text-white flex-1 md:flex-none justify-center px-8 py-2 rounded-md hover:scale-105 transition-transform focus:outline-none disabled:bg-slate-400 disabled:hover:scale-100"
         >
           <span className="hidden md:flex md:mr-2">
-            {currentRound === totalRounds
+            {gameMode === "endless"
+              ? status !== "win-round"
+                ? "Finalizar"
+                : "Siguiente"
+              : currentRound === totalRounds
               ? "Finalizar"
               : status === "win-round"
               ? "Siguiente"
@@ -302,7 +363,7 @@ export function precisionToClass(precision: number) {
   return "text-sky-400";
 }
 
-function precisionToText(
+export function precisionToText(
   precisionTries: number,
   precisionPoints: number
 ): string {

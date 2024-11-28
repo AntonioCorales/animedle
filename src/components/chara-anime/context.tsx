@@ -1,3 +1,4 @@
+"use client";
 import {
   createContext,
   useCallback,
@@ -11,7 +12,6 @@ import { usePageContext } from "../context";
 import { SearchAnime } from "../game/context";
 import { useGetAnimeRelated } from "../utils/useGetAnimeRelated";
 import { getRandomByArray } from "../utils/functions";
-import useStorage from "../useStorage";
 
 type CharaAnimeStatus =
   | "loading"
@@ -70,6 +70,8 @@ export type CharaAnimeContext = {
   isLoadingCharacters: boolean;
   gameMode: CharaAnimeGameMode;
   setGameMode: (mode: CharaAnimeGameMode) => void;
+  isNewRecordEndless: boolean;
+  setIsNewRecordEndless: (isNewRecord: boolean) => void;
 };
 
 const CharaAnimeContext = createContext<CharaAnimeContext>({
@@ -102,6 +104,8 @@ const CharaAnimeContext = createContext<CharaAnimeContext>({
   gameMode: "classic",
   setGameMode: () => {},
   anime: null,
+  isNewRecordEndless: false,
+  setIsNewRecordEndless: () => {},
 });
 
 export function CharaAnimeProvider({
@@ -123,7 +127,13 @@ export function CharaAnimeProvider({
 
   const [gameMode, setGameMode] = useState<CharaAnimeGameMode>("classic");
 
-  const { animes: animesTotal, isLoading: isLoadingAnimes, allAnimes } = usePageContext();
+  const [isNewRecordEndless, setIsNewRecordEndless] = useState(false);
+
+  const {
+    animes: animesTotal,
+    isLoading: isLoadingAnimes,
+    allAnimes,
+  } = usePageContext();
 
   const {
     characters,
@@ -149,6 +159,7 @@ export function CharaAnimeProvider({
   };
 
   const initGame = () => {
+    setIsNewRecordEndless(false);
     setRounds([]);
     setCurrentRound(0);
     setCurrentPosition(0);
@@ -164,7 +175,7 @@ export function CharaAnimeProvider({
   };
 
   const addAnime = (anime: SearchAnime) => {
-    if(status === "show-names") return false;
+    if (status === "show-names") return false;
     const newSelectedAnimes = [anime, ...selectedAnimes];
     setSelectedAnimes(newSelectedAnimes);
     if (
@@ -194,13 +205,22 @@ export function CharaAnimeProvider({
       setStatus("win-round");
       return true;
     } else if (gameMode === "hardcore") {
-      if(currentPosition === 4) {
+      if (currentPosition === 4) {
         setStatus("show-names");
         return false;
       }
       setCurrentPosition((prev) => prev + 1);
-
-    } 
+    } else if (gameMode === "endless") {
+      setRounds((prev) => [
+        ...prev,
+        {
+          animes,
+          characters,
+          points: 0,
+          selectedAnimes: newSelectedAnimes,
+        },
+      ]);
+    }
     setStatus("error-round");
     return false;
   };
@@ -210,7 +230,7 @@ export function CharaAnimeProvider({
   };
 
   const nextRound = () => {
-    if(!anime) return;
+    if (!anime) return;
     const alreadyShowed = [...animesAlreadyShowed, anime.id];
     setAnimesAlreadyShowed(alreadyShowed);
     if (selectedAnimes.length === 0 && currentRound > 0) {
@@ -224,9 +244,20 @@ export function CharaAnimeProvider({
         },
       ]);
     }
-    if (totalRounds !== 0 && currentRound === totalRounds) {
+    if (
+      gameMode === "endless" &&
+      (status === "error-round" ||
+        status === "show-names" ||
+        status !== "win-round")
+    ) {
       setStatus("end");
       return;
+    }
+    if (gameMode !== "endless") {
+      if (totalRounds !== 0 && currentRound === totalRounds) {
+        setStatus("end");
+        return;
+      }
     }
     setCurrentRound((prev) => prev + 1);
     initRound();
@@ -240,8 +271,9 @@ export function CharaAnimeProvider({
   }, [animesAlreadyShowed, redo]);
 
   useEffect(() => {
-    if(totalRounds > animesTotal.length) setTotalRounds(animesTotal.length);
-  }, [totalRounds, animesTotal])
+    if (totalRounds > animesTotal.length || gameMode === "endless")
+      setTotalRounds(animesTotal.length);
+  }, [totalRounds, animesTotal, gameMode]);
 
   return (
     <CharaAnimeContext.Provider
@@ -275,6 +307,8 @@ export function CharaAnimeProvider({
         gameMode,
         setGameMode,
         anime,
+        isNewRecordEndless,
+        setIsNewRecordEndless,
       }}
     >
       {children}
@@ -334,22 +368,25 @@ function getRandomCharacters(charactersData: CharacterData[], X: number) {
   );
   const mainCharacters = characters.filter((char) => char.role === "Main");
 
-  if (supportingCharacters.length < X - 1 ) {    
-    if(mainCharacters.length < X - supportingCharacters.length) return [];
+  if (supportingCharacters.length < X - 1) {
+    if (mainCharacters.length < X - supportingCharacters.length) return [];
     const characterToReturn: CharacterData[] = supportingCharacters;
     let tries = 0;
-    while (characterToReturn.length < X && tries < 10) {      
-      const characterData = getRandomByArray(mainCharacters)
-      if(!characterData) continue;
-      if (!characterToReturn.some((char) => char.character.mal_id === characterData.character.mal_id)) {
+    while (characterToReturn.length < X && tries < 10) {
+      const characterData = getRandomByArray(mainCharacters);
+      if (!characterData) continue;
+      if (
+        !characterToReturn.some(
+          (char) => char.character.mal_id === characterData.character.mal_id
+        )
+      ) {
         characterToReturn.push(characterData);
-      }      
-      tries++
+      }
+      tries++;
     }
     characterToReturn.sort((a, b) => a.favorites - b.favorites);
-    if(characterToReturn.length < X) return [];
+    if (characterToReturn.length < X) return [];
     return characterToReturn;
-   
   }
 
   // Ordenar los Supporting Characters por favoritos

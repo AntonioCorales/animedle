@@ -3,12 +3,9 @@ import { useEffect, useState } from "react";
 
 export default function useStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === "undefined") {
-      return initialValue;
-    }
     try {
       const item = window.localStorage.getItem(key);
-      if(!item) {
+      if (!item) {
         window.localStorage.setItem(key, JSON.stringify(initialValue));
         return initialValue;
       }
@@ -24,9 +21,7 @@ export default function useStorage<T>(key: string, initialValue: T) {
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
       console.log(error);
     }
@@ -38,10 +33,11 @@ export default function useStorage<T>(key: string, initialValue: T) {
       if (item) {
         setStoredValue(JSON.parse(item));
         return;
-      }      
+      }
       window.localStorage.setItem(key, JSON.stringify(initialValue));
       setStoredValue(initialValue);
     } catch (error) {
+      setStoredValue(initialValue);
       console.log(error);
     }
   }, [key, initialValue]);
