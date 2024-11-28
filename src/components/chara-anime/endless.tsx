@@ -27,6 +27,9 @@ export const TimerBar = () => {
   const { counter, setState } = useCounterContext();
   const [percent, setPercent] = useState(100);
   const [extraTime, setExtraTime] = useState(0);
+  const [leftTime, setLeftTime] = useState(maxTime);
+
+  console.log({ leftTime, counter, percent });
 
   useEffect(() => {
     if (
@@ -39,13 +42,14 @@ export const TimerBar = () => {
   }, [status, setState]);
 
   useEffect(() => {
-    if (
-      status === "win-round" ||
-      status === "error-round" ||
-      status === "show-names"
-    ) {
+    if (status === "win-round") {
       return;
     }
+    if (status === "error-round" || status === "show-names") {
+      setPercent(0);
+      return;
+    }
+
     if (currentPosition < 1) {
       setState("pause");
     } else {
@@ -55,19 +59,30 @@ export const TimerBar = () => {
 
   useEffect(() => {
     const percent =
-      maxTime >= counter
-        ? ((maxTime - (counter + extraTime)) / maxTime) * 100
+      maxTime >= leftTime
+        ? (leftTime / maxTime) * 100
         : 0;
 
     setPercent(percent);
+  }, [leftTime]);
+
+  useEffect(() => {
+    setLeftTime(maxTime - counter - extraTime);
   }, [counter, extraTime]);
 
   useEffect(() => {
-    if(currentPosition <= 1) {
-      setExtraTime(0);
+    if (currentPosition <= 1) {
+      setLeftTime(maxTime);
       return;
     }
-    setExtraTime((prev) => prev + 5);
+    setLeftTime((prev)=> {
+      const newExtraTime = (currentPosition - 1) * 5;
+      if (prev + newExtraTime < maxTime) {
+        return prev;
+      }      
+      setExtraTime(newExtraTime);
+      return prev - 5;
+    })
   }, [currentPosition]);
 
   useEffect(() => {

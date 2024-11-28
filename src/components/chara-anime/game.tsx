@@ -231,7 +231,7 @@ function Stats() {
           </span>
         </AnimationPulseStyles>
       )}
-      {status === "error-round" && (
+      {(status === "error-round" || status === "show-names") && (
         <AnimationPulseStyles>
           <span className="text-red-500 text-xl leading-4">
             <Close />
