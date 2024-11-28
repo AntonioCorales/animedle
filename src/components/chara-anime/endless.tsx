@@ -21,12 +21,12 @@ export const RecordEndless = () => {
 };
 
 export const TimerBar = () => {
-  const maxTime = 30;
+  const maxTime = 20;
   const { currentRound, currentPosition, status, setStatus } =
     useCharaAnimeContext();
   const { counter, setState } = useCounterContext();
-
   const [percent, setPercent] = useState(100);
+  const [extraTime, setExtraTime] = useState(0);
 
   useEffect(() => {
     if (
@@ -55,10 +55,20 @@ export const TimerBar = () => {
 
   useEffect(() => {
     const percent =
-      maxTime >= counter ? ((maxTime - counter) / maxTime) * 100 : 0;
+      maxTime >= counter
+        ? ((maxTime - (counter + extraTime)) / maxTime) * 100
+        : 0;
 
     setPercent(percent);
-  }, [counter]);
+  }, [counter, extraTime]);
+
+  useEffect(() => {
+    if(currentPosition <= 1) {
+      setExtraTime(0);
+      return;
+    }
+    setExtraTime((prev) => prev + 5);
+  }, [currentPosition]);
 
   useEffect(() => {
     if (percent <= 0) {
@@ -124,9 +134,7 @@ export function EndlessEnd() {
       {maxPoints === totalPoints && totalTries === totalRounds && (
         <span className="text-lg text-sky-400">¡Puntuación perfecta!</span>
       )}
-      <span className={"text-lg mb-1 "}>
-        Has obtenido {totalPoints} puntos
-      </span>
+      <span className={"text-lg mb-1 "}>Has obtenido {totalPoints} puntos</span>
       <div className="flex flex-col text-center ">
         <span className={`text-2xl ${textClass} relative leading-5`}>
           {precision}
