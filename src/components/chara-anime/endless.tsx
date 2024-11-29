@@ -29,8 +29,6 @@ export const TimerBar = () => {
   const [extraTime, setExtraTime] = useState(0);
   const [leftTime, setLeftTime] = useState(maxTime);
 
-  console.log({ leftTime, counter, percent });
-
   useEffect(() => {
     if (
       status === "win-round" ||
@@ -78,10 +76,11 @@ export const TimerBar = () => {
     setLeftTime((prev)=> {
       const newExtraTime = (currentPosition - 1) * 5;
       if (prev + newExtraTime < maxTime) {
-        return prev;
+        return 5;
       }      
       setExtraTime(newExtraTime);
-      return prev - 5;
+      const newLeftTime = prev - 5;
+      return newLeftTime >= 5 ? newLeftTime : 5;
     })
   }, [currentPosition]);
 
