@@ -56,32 +56,25 @@ export const TimerBar = () => {
   }, [currentRound, setState, currentPosition, status]);
 
   useEffect(() => {
-    const percent =
-      maxTime >= leftTime
-        ? (leftTime / maxTime) * 100
-        : 0;
+    const percent = maxTime >= leftTime ? (leftTime / maxTime) * 100 : 0;
 
     setPercent(percent);
   }, [leftTime]);
 
   useEffect(() => {
-    setLeftTime(maxTime - counter - extraTime);
-  }, [counter, extraTime]);
+    setLeftTime((prev)=> prev - 0.01);
+  }, [counter]);
 
   useEffect(() => {
     if (currentPosition <= 1) {
       setLeftTime(maxTime);
       return;
     }
-    setLeftTime((prev)=> {
-      const newExtraTime = (currentPosition - 1) * 5;
-      if (prev + newExtraTime < maxTime) {
-        return 5;
-      }      
-      setExtraTime(newExtraTime);
-      const newLeftTime = prev - 5;
-      return newLeftTime >= 5 ? newLeftTime : 5;
-    })
+    setLeftTime((prev) => {
+      if(prev <= 5) return prev;
+      if(prev <= 10) return 5;
+      return prev - 5;
+    });
   }, [currentPosition]);
 
   useEffect(() => {
