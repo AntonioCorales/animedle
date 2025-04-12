@@ -1,3 +1,4 @@
+"use client";
 import { useAniCoverContext } from "@/components/ani-cover/context";
 import { SubtitleStyles, TitleStyles } from "../common";
 import SearchAnimeSelect from "../game/Search";
@@ -5,6 +6,8 @@ import { CardAnimationPulseStyles } from "../chara-anime/game";
 import { SearchAnime } from "../game/context";
 import { RefreshOutlined } from "@mui/icons-material";
 import ConfettiExplosion from "react-confetti";
+import { PixelatedImage } from "./Pixeled";
+import useStorage from "../useStorage";
 
 export default function AniCoverGame() {
   return (
@@ -48,10 +51,15 @@ function GameBar() {
 }
 
 function Game() {
-  const { answer, selectedAnimes, status, addAnime } = useAniCoverContext();
+  const { answer, selectedAnimes, status, addAnime, restartGame } =
+    useAniCoverContext();
 
   const blur = status === "win" ? 0 : 10 - selectedAnimes.length;
   const grayscale = status === "win" ? 0 : (10 - selectedAnimes.length) * 10;
+  const pixelSize = status === "win" ? 1 : blur * 2.5;
+
+  const [pixelated, setPixelated] = useStorage("aniCoverPixelated", false);
+
   return (
     <div className="flex gap-6 flex-col-reverse md:flex-row">
       <div className="flex-col gap-2 flex md:hidden">
@@ -65,19 +73,37 @@ function Game() {
             status === "win" ? "outline-green-600" : "outline-red-600"
           }`}
         >
-          <img
-            src={answer?.image_large}
-            alt={"image"}
-            height={500}
-            width={400}
-            className="select-none touch-none pointer-events-none"
-            style={{
-              filter: `blur(${blur}px) grayscale(${grayscale}%)`,
-            }}
-          />
+          {pixelated ? (
+            <PixelatedImage src={answer?.image_large} pixelSize={pixelSize} />
+          ) : (
+            <img
+              src={answer?.image_large}
+              alt={"image"}
+              height={500}
+              width={400}
+              className="select-none touch-none pointer-events-none"
+              style={{
+                filter: `blur(${blur}px) grayscale(${grayscale}%)`,
+              }}
+            />
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-4 flex-1">
+        <div className="flex gap-2 ">
+          <button
+            className={`p-2 text-white rounded-md hover:scale-105 transition-transform focus:outline-none ${
+              pixelated ? "bg-sky-800" : "bg-red-600"
+            }`}
+            onClick={() => {
+              setPixelated(!pixelated);
+            }}
+          >
+            {pixelated
+              ? "Modo pixeleado: activado"
+              : "Modo pixeleado: desactivado"}
+          </button>
+        </div>
         <SearchAnimeSelect
           onSelect={(anime) => {
             addAnime(anime);

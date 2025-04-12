@@ -2,14 +2,19 @@
 
 import { AniCoverProvider } from "@/components/ani-cover/context";
 import { CounterProvider } from "../game/counter-context";
-import AniCoverGame from "./game";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+const AniCoverGame = dynamic(() => import("./game"), { ssr: false });
 
 
 export default function AniCover() {
     return (
       <AniCoverProvider>
         <CounterProvider>
-          <AniCoverGame />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AniCoverGame />
+          </Suspense>
         </CounterProvider>
       </AniCoverProvider>
     );
