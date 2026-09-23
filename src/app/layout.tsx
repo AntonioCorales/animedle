@@ -69,17 +69,6 @@ export default function RootLayout({
                   <span>Desarrollado por: Kkuuhaku</span>
                   <span>Versión: 1.3.5</span>
                   <div className="flex flex-col gap-1 items-end">
-                    <span className="text-right ">
-                      Contiene datos de la lista de{" "}
-                      <a
-                        className="text-slate-400 hover:text-sky-500"
-                        href="https://anilist.co/user/DoubleCReacts/animelist"
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        DoubleCReacts
-                      </a>
-                    </span>
                     <span className="text-right">
                       Datos obtenidos usando:{" "}
                       <a

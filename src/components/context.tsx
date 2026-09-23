@@ -29,7 +29,7 @@ const PageContext = createContext<PageContext>({
 });
 
 const DEFAULT_LIST_NAMES: ListName[] = ["Completed"];
-const DEFAULT_USER = "DoubleCReacts";
+const DEFAULT_USER = "Kkuuhaku";
 
 export function PageProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<string>("");
