@@ -4,28 +4,43 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import InputSearch from "../server-views/InputSearch";
 import { SearchAnime } from "./context";
 import { CloseOutlined } from "@mui/icons-material";
-import { LIST_NAMES, usePageContext } from "../context";
+import { usePageContext } from "../context";
 import { useGetAnimeByUser } from "../queries/getAnimeByUser";
 import { formatAnimes, FormatAnimesOptions } from "../utils/useGetAnime";
+import {
+  AnimedleHints,
+  DEFAULT_ANIMEDLE_HINTS,
+  readAnimedleHints,
+} from "../elements/Settings";
 
 export default function SearchAnimeSelect(props: SearchProps) {
   const {
-    showMainGenre,
-    showMainTag,
-    showYears,
     onSelect,
     disabled,
     formatOptions,
     excludeAnimes = [],
     hideImage,
   } = props;
-  const { user, listNames } = usePageContext();
+  const { user, listNames, formats } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
 
   const [animes, setAnimes] = useState<SearchAnime[]>([]);
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [hints, setHints] = useState<AnimedleHints>(DEFAULT_ANIMEDLE_HINTS);
+
+  useEffect(() => {
+    setHints(readAnimedleHints());
+    const onStorage = () => setHints(readAnimedleHints());
+    const onCustom = () => setHints(readAnimedleHints());
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("animedle-hints-change", onCustom);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("animedle-hints-change", onCustom);
+    };
+  }, []);
 
   const filteredAnimes = useFilteredAnimes(excludeAnimes, animes, search);
 
@@ -49,23 +64,19 @@ export default function SearchAnimeSelect(props: SearchProps) {
     [onSelect, search]
   );
 
-  useEffect(() => {    
+  useEffect(() => {
     const animes = formatAnimes(data, {
       ...formatOptions,
-      types: LIST_NAMES,
+      types: listNames,
+      formats,
     });
     setAnimes(animes);
-  }, [data, formatOptions, listNames]);
+  }, [data, formatOptions, listNames, formats]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        const inputElement = ref.current?.querySelector(
-          "input"
-        ) as HTMLInputElement;
-
-        if (inputElement) {
-        }
+        setIsOpen(false);
       }
     };
 
@@ -137,12 +148,15 @@ export default function SearchAnimeSelect(props: SearchProps) {
   }, [selectedIndex]);
 
   return (
-    <div className="flex flex-col gap-2 relative">
-      <div ref={ref} className="relative">
+    <div ref={ref} className="flex flex-col gap-2 relative">
+      <div className="relative">
         <InputSearch
           value={search}
           placeholder="Buscar"
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsOpen(true);
+          }}
           disabled={disabled}
           className={props.className}
         />
@@ -158,10 +172,10 @@ export default function SearchAnimeSelect(props: SearchProps) {
           <CloseOutlined />
         </button>
       </div>
-      {search && !disabled && (
+      {isOpen && search && !disabled && (
         <div
           id="options-search"
-          className="text-white bg-slate-900 z-[9999] position absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
+          className="text-white bg-slate-900 z-[9999] absolute top-[100%] w-full max-h-[500px] overflow-y-auto "
         >
           {filteredAnimes?.map((filteredAnime, index) => (
             <div
@@ -194,9 +208,15 @@ export default function SearchAnimeSelect(props: SearchProps) {
                   {filteredAnime.englishName}
                 </span>
                 <div className="text-xs text-sky-400 leading-4 flex flex-col gap-1">
-                  {showMainGenre && <span>{filteredAnime.genres[0]}</span>}
-                  {showMainTag && <span>{filteredAnime.tags[0]}</span>}
-                  {showYears && <span>{filteredAnime.seasonYear}</span>}
+                  {hints.showMainGenre && filteredAnime.genres[0] && (
+                    <span>{filteredAnime.genres[0]}</span>
+                  )}
+                  {hints.showMainTag && filteredAnime.tags[0] && (
+                    <span>{filteredAnime.tags[0]}</span>
+                  )}
+                  {hints.showYears && filteredAnime.seasonYear && (
+                    <span>{filteredAnime.seasonYear}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -267,9 +287,6 @@ function useFilteredAnimes(
 
 type SearchProps = {
   disabled?: boolean;
-  showMainGenre?: boolean;
-  showMainTag?: boolean;
-  showYears?: boolean;
   onSelect?: (anime: SearchAnime) => void;
   formatOptions?: FormatAnimesOptions;
   className?: string;

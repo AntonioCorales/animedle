@@ -1,5 +1,6 @@
 import {
   Entry,
+  Format,
   ListName,
   MediaListCollection,
   NodesStudio,
@@ -11,6 +12,7 @@ import { useEffect, useState } from "react";
 
 export type FormatAnimesOptions = {
   types?: ListName[];
+  formats?: Format[];
   tagsLimit?: number;
   excludeAnimes?: number[];
 };
@@ -77,7 +79,7 @@ export function formatAnimes(
   options?: FormatAnimesOptions
 ): SearchAnime[] {
   if (!animes) return [];
-  const { types = DEFAULT_OPTIONS.types, tagsLimit } = options || {};
+  const { types = DEFAULT_OPTIONS.types, formats, tagsLimit } = options || {};
   if (types.length === 0) return [];
   const listsAnimes = animes.lists.filter((list) => {
     return types.includes(list.name);
@@ -90,6 +92,12 @@ export function formatAnimes(
     });
     dataToReturn.push(...listAnimes);
   });
+
+  if (formats && formats.length > 0) {
+    return dataToReturn.filter((anime) =>
+      formats.includes(anime.format as Format)
+    );
+  }
 
   return dataToReturn;
 }

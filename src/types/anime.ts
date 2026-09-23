@@ -129,4 +129,26 @@ export type MediaNode = {
   format: Format;
   title:  Title;
 }
-export type Format = "NOVEL" | "TV" | "MANGA" | "ONE_SHOT";
+export type Format =
+  | "TV"
+  | "TV_SHORT"
+  | "MOVIE"
+  | "SPECIAL"
+  | "OVA"
+  | "ONA"
+  | "MUSIC"
+  | "MANGA"
+  | "NOVEL"
+  | "ONE_SHOT";
+
+export const ANIME_FORMATS: Format[] = [
+  "TV",
+  "TV_SHORT",
+  "MOVIE",
+  "SPECIAL",
+  "OVA",
+  "ONA",
+  "MUSIC",
+];
+
+export const DEFAULT_ANIME_FORMATS: Format[] = ["TV", "MOVIE", "OVA", "ONA"];

@@ -8,9 +8,10 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { SubtitleStyles, TitleStyles } from "../common";
 import { useCounterContext } from "./counter-context";
+import { AnimedleHints, DEFAULT_ANIMEDLE_HINTS, readAnimedleHints } from "../elements/Settings";
 
 export default function AnimeDleGame() {
-  const { addAnime, setState, anime, state, selectedAnimesIds, showMainGenre, showYears, showMainTag } = useGameContext();
+  const { addAnime, setState, anime, state, selectedAnimesIds } = useGameContext();
   const {setState: setCounterState} = useCounterContext();
   return (
     <>
@@ -43,11 +44,8 @@ export default function AnimeDleGame() {
               setCounterState("play");
             }}
             disabled={state === "win"}
-            formatOptions={{tagsLimit: 4, types: ["Completed"]}}
+            formatOptions={{tagsLimit: 4}}
             excludeAnimes={selectedAnimesIds}
-            showMainGenre={showMainGenre}
-            showMainTag={showMainTag}
-            showYears={showYears}
           />
           <Actions />
           <Status />
@@ -64,13 +62,24 @@ function Actions() {
     anime,
     resetGame,
     selectedAnimes,
-    setShowYears,
-    setShowMainGenre,
-    setShowMainTag,
+    revealedYears,
+    revealYears,
+    revealedMainGenre,
+    revealMainGenre,
+    revealedMainTag,
+    revealMainTag,
   } = useGameContext();
   const { length } = selectedAnimes;
   const description = formatDescription(anime?.description);
   const { reset } = useCounterContext();
+  const [hints, setHints] = useState<AnimedleHints>(DEFAULT_ANIMEDLE_HINTS);
+
+  useEffect(() => {
+    setHints(readAnimedleHints());
+    const onStorage = () => setHints(readAnimedleHints());
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const handleReset = () => {
     resetGame();
@@ -78,35 +87,37 @@ function Actions() {
   };
   return (
     <div className="flex gap-4 justify-between">
-      <div className="flex flex-col lg:flex-row lg:gap-4  lg:items-center">
-        {length >= 4 && (
-          <label className="flex gap-2 ">
-            <input
-              type="checkbox"
-              onChange={(e) => setShowYears(e.target.checked)}
-            />
-            Ver años
-          </label>
+      <div className="flex flex-col lg:flex-row lg:gap-4 lg:items-center flex-wrap">
+        {hints.showYears && length >= 4 && (
+          <button
+            className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
+            onClick={revealYears}
+            disabled={revealedYears}
+          >
+            {revealedYears ? `Año: ${anime?.seasonYear ?? "?"}` : "Mostrar años"}
+          </button>
         )}
-        {length >= 6 && (
-          <label className="flex gap-2">
-            <input
-              className="outline-none"
-              type="checkbox"
-              onChange={(e) => setShowMainGenre(e.target.checked)}
-            />
-            Ver género principal
-          </label>
+        {hints.showMainGenre && length >= 6 && (
+          <button
+            className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
+            onClick={revealMainGenre}
+            disabled={revealedMainGenre}
+          >
+            {revealedMainGenre
+              ? `Género principal: ${anime?.genres[0] ?? "?"}`
+              : "Mostrar género principal"}
+          </button>
         )}
-        {length >= 8 && (
-          <label className="flex gap-2">
-            <input
-              className="outline-none"
-              type="checkbox"
-              onChange={(e) => setShowMainTag(e.target.checked)}
-            />
-            Ver etiqueta principal
-          </label>
+        {hints.showMainTag && length >= 8 && (
+          <button
+            className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
+            onClick={revealMainTag}
+            disabled={revealedMainTag}
+          >
+            {revealedMainTag
+              ? `Etiqueta principal: ${anime?.tags[0] ?? "?"}`
+              : "Mostrar etiqueta principal"}
+          </button>
         )}
         {length >= 10 && description && (
           <button

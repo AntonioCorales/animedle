@@ -48,12 +48,12 @@ type GameContextType = {
   resetGame: () => void;
   state: GameState;
   setState: (state: GameState) => void;
-  showYears: boolean;
-  setShowYears: (showYears: boolean) => void;
-  showMainGenre: boolean;
-  setShowMainGenre: (showMainGenre: boolean) => void;
-  showMainTag: boolean;
-  setShowMainTag: (showMainTags: boolean) => void;
+  revealedYears: boolean;
+  revealYears: () => void;
+  revealedMainGenre: boolean;
+  revealMainGenre: () => void;
+  revealedMainTag: boolean;
+  revealMainTag: () => void;
 };
 
 const GameContext = createContext<GameContextType>({
@@ -64,27 +64,27 @@ const GameContext = createContext<GameContextType>({
   resetGame: () => {},
   state: "play",
   setState: () => {},
-  showYears: false,
-  setShowYears: () => {},
-  showMainGenre: false,
-  setShowMainGenre: () => {},
-  showMainTag: false,
-  setShowMainTag: () => {},
+  revealedYears: false,
+  revealYears: () => {},
+  revealedMainGenre: false,
+  revealMainGenre: () => {},
+  revealedMainTag: false,
+  revealMainTag: () => {},
 });
 
 export function GameProvider({ children }: React.PropsWithChildren) {
-  const { user } = usePageContext();
+  const { user, listNames, formats } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
-  
+
   const [animes, setAnimes] = useState<SearchAnime[]>([]);
-  const [anime, setAnime] = useState(getRandomByArray(animes));  
+  const [anime, setAnime] = useState(getRandomByArray(animes));
 
   const [selectedAnimes, setSelectedAnimes] = useState<SearchAnime[]>([]);
   const [selectedAnimesIds, setSelectedAnimesIds] = useState<number[]>([]);
   const [state, setState] = useState<GameState>("stale");
-  const [showYears, setShowYears] = useState<boolean>(false);
-  const [showMainGenre, setShowMainGenre] = useState<boolean>(false);
-  const [showMainTag, setShowMainTag] = useState<boolean>(false);
+  const [revealedYears, setRevealedYears] = useState<boolean>(false);
+  const [revealedMainGenre, setRevealedMainGenre] = useState<boolean>(false);
+  const [revealedMainTag, setRevealedMainTag] = useState<boolean>(false);
 
   const addAnime = (anime: SearchAnime) => {
     setState("play");
@@ -92,22 +92,26 @@ export function GameProvider({ children }: React.PropsWithChildren) {
       setSelectedAnimesIds([...selectedAnimesIds, anime.id]);
       setSelectedAnimes([anime, ...selectedAnimes]);
     }
-  };  
+  };
 
   useEffect(() => {
-    const animes = formatAnimes(data, {tagsLimit: 4, types: ["Completed"]});
+    const animes = formatAnimes(data, {
+      tagsLimit: 4,
+      types: listNames,
+      formats,
+    });
     setAnimes(animes);
     setAnime(getRandomByArray(animes));
-  }, [data]);
+  }, [data, formats, listNames]);
 
   const resetGame = () => {
     setAnime(getRandomByArray(animes));
     setState("stale");
     setSelectedAnimes([]);
     setSelectedAnimesIds([]);
-    setShowMainGenre(false);
-    setShowMainTag(false);
-    setShowYears(false);    
+    setRevealedMainGenre(false);
+    setRevealedMainTag(false);
+    setRevealedYears(false);
   };  
 
 
@@ -122,12 +126,12 @@ export function GameProvider({ children }: React.PropsWithChildren) {
         resetGame,
         state,
         setState,
-        showYears,
-        setShowYears,
-        showMainGenre,
-        setShowMainGenre,
-        showMainTag,
-        setShowMainTag,
+        revealedYears,
+        revealYears: () => setRevealedYears(true),
+        revealedMainGenre,
+        revealMainGenre: () => setRevealedMainGenre(true),
+        revealedMainTag,
+        revealMainTag: () => setRevealedMainTag(true),
       }}
     >
       {children}
