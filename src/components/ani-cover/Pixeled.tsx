@@ -10,11 +10,12 @@ export const PixelatedImage = ({ src, pixelSize = 10 }: PixelatedImageProps) => 
   const [aspectRatio, setAspectRatio] = useState<string>("4/5");
 
   useEffect(() => {
-    if(pixelSize === 0) return;
     if(!src) return;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
+
+    const safePixelSize = Math.max(1, pixelSize);
 
     const img = new Image();
 
@@ -28,8 +29,8 @@ export const PixelatedImage = ({ src, pixelSize = 10 }: PixelatedImageProps) => 
       canvas.width = width;
       canvas.height = height;
 
-      const scaledW = Math.ceil(width / pixelSize);
-      const scaledH = Math.ceil(height / pixelSize);
+      const scaledW = Math.max(1, Math.ceil(width / safePixelSize));
+      const scaledH = Math.max(1, Math.ceil(height / safePixelSize));
 
       // Crear canvas temporal
       const tempCanvas = document.createElement("canvas");
@@ -42,7 +43,7 @@ export const PixelatedImage = ({ src, pixelSize = 10 }: PixelatedImageProps) => 
       tempCtx.drawImage(img, 0, 0, scaledW, scaledH);
 
       // Dibujar imagen escalada (pixeleada)
-      ctx.imageSmoothingEnabled = false;
+      ctx.imageSmoothingEnabled = safePixelSize > 1 ? false : true;
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(tempCanvas, 0, 0, scaledW, scaledH, 0, 0, width, height);
     };

@@ -51,14 +51,18 @@ function GameBar() {
 }
 
 function Game() {
-  const { answer, selectedAnimes, status, addAnime, restartGame } =
+  const { answer, selectedAnimes, status, addAnime, restartGame, giveUp } =
     useAniCoverContext();
 
-  const blur = status === "win" ? 0 : 10 - selectedAnimes.length;
-  const grayscale = status === "win" ? 0 : (10 - selectedAnimes.length) * 10;
-  const pixelSize = status === "win" ? 1 : blur * 2.5;
+  const remaining = Math.max(0, 10 - selectedAnimes.length);
+  const blur = status === "win" ? 0 : remaining;
+  const grayscale = status === "win" ? 0 : remaining * 10;
+  const pixelSize = status === "win" ? 1 : Math.max(1, blur * 2.5);
 
   const [pixelated, setPixelated] = useStorage("aniCoverPixelated", false);
+
+  const isRoundOver = status === "end";
+  const showGiveUpButton = remaining === 0 && status === "playing";
 
   return (
     <div className="flex gap-6 flex-col-reverse md:flex-row">
@@ -67,10 +71,14 @@ function Game() {
           <SelectedAnime key={selectedAnime.id} anime={selectedAnime} />
         ))}
       </div>
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-3">
         <div
-          className={`w-fit h-fit overflow-hidden rounded-md outline outline-2 outline-sky-600 ${
-            status === "win" ? "outline-green-600" : "outline-red-600"
+          className={`w-fit h-fit overflow-hidden rounded-md outline outline-2 ${
+            status === "win"
+              ? "outline-green-600"
+              : isRoundOver
+              ? "outline-yellow-600"
+              : "outline-red-600"
           }`}
         >
           {pixelated ? (
@@ -88,9 +96,20 @@ function Game() {
             />
           )}
         </div>
+        {isRoundOver && answer && (
+          <div className="flex flex-col items-center text-center bg-yellow-900/40 border border-yellow-600 rounded-md p-2">
+            <span className="text-yellow-300 text-xs uppercase tracking-wide">
+              Era
+            </span>
+            <span className="text-white font-semibold">{answer.name}</span>
+            {answer.englishName && (
+              <span className="text-zinc-300 text-sm">{answer.englishName}</span>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex flex-col gap-4 flex-1">
-        <div className="flex gap-2 ">
+        <div className="flex gap-2 flex-wrap">
           <button
             className={`p-2 text-white rounded-md hover:scale-105 transition-transform focus:outline-none ${
               pixelated ? "bg-sky-800" : "bg-red-600"
@@ -103,6 +122,14 @@ function Game() {
               ? "Modo pixeleado: activado"
               : "Modo pixeleado: desactivado"}
           </button>
+          {showGiveUpButton && (
+            <button
+              className="p-2 text-white rounded-md bg-yellow-700 hover:scale-105 transition-transform focus:outline-none"
+              onClick={giveUp}
+            >
+              Ver anime
+            </button>
+          )}
         </div>
         <SearchAnimeSelect
           onSelect={(anime) => {

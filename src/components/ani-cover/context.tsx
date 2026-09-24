@@ -30,6 +30,7 @@ type AniCoverContextType = {
   selectedAnimes: SearchAnime[];
   addAnime: (anime: SearchAnime) => void;
   restartGame: () => void;
+  giveUp: () => void;
   relatedAnimes: SearchAnimeRelation[];
 };
 
@@ -41,6 +42,7 @@ const AniCoverContext = createContext<AniCoverContextType>({
   selectedAnimes: [],
   addAnime: () => {},
   restartGame: () => {},
+  giveUp: () => {},
   relatedAnimes: [],
 });
 
@@ -66,6 +68,10 @@ export function AniCoverProvider({ children }: React.PropsWithChildren) {
     initAniCover();
   };
 
+  const giveUp = () => {
+    setStatus("end");
+  };
+
   const initAniCover = useCallback(() => {
     setStatus("loading");
     const animeAnswer = getRandomByArray(animes);
@@ -89,6 +95,7 @@ export function AniCoverProvider({ children }: React.PropsWithChildren) {
         selectedAnimes,
         addAnime,
         restartGame,
+        giveUp,
         relatedAnimes,
       }}
     >
