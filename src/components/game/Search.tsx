@@ -282,7 +282,7 @@ function useFilteredAnimes(
     }
   }, [animes, search, selectedAnimesIds]);
 
-  return filteredAnimes.slice(0, 10);
+  return filteredAnimes;
 }
 
 type SearchProps = {
