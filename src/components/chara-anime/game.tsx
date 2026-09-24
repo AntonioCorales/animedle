@@ -386,7 +386,7 @@ export function precisionToText(
       "Apenas y lo intentaste... o eso parece.",
       "¿Un esfuerzo mínimo? ¡Inténtalo en serio!",
       "Este juego necesita que enciendas la pantalla.",
-      '"Eres Manco, como Yair17" -henry__0408',
+      'Eres Manco, como Yair17',
     ],
     50: [
       "¡¿Cómo sacaste tan pocos puntos?!",
@@ -403,29 +403,24 @@ export function precisionToText(
       "A medio camino entre bien y el caer en pozo.",
       "¡Vas bien!, pero te falta un poco de neuronas.",
       "¿Ya estás cansado?... Porque se esta notando",
-      '"Hasta los fans de Dragon Ball saben mas." -Ahunae',
-      '"El chat te esta insultando ¿Te dejas?" - akio7512',
     ],
     90: [
       "¡Bueno, pero no tanto!",
       "¡Casi lo logras! Ahora intenta usar el resto del cerebro.",
       "Pues ni tan mal, no pense que llegarías a tanto.",
       "Estás muy cerca... ¿Y si lo intentas otra vez?",
-      '"Muy bien, pero el chat lo haría mejor." -endertroll12345_original',
     ],
     100: [
       "¡¡GOOOOOD!!",
       "Perfección casi lograda, ¡JEJE GOD!",
       "¿Tus habilidades ya están al límite?",
       "Estoy sinceramente impresionado.",
-      "Casi inmejorable, pero Goku te gana.",
     ],
   };
 
   const precisionTriesMessages = {
     true: [
       "¡¡ERES DIOS, ¿¿PERO TANTO ESFUERZO VALIÓ LA PENA??!!",
-      '"Ya era hora que hicieseis todo bien, no cuesta tanto." -Rodri12721',
       "¡Increíble! Lo alcanzaste, ¿Cuantas neuronas sacrificaste?",
       "Todo este vicio, para este resultado... ¿Felicidades?",
       "Ni Cell hubiera logrado tanta perfección.",
@@ -433,7 +428,7 @@ export function precisionToText(
     false: [
       "NADA, ERES BUENÍSIMO. ¿PERO LA PRECISIÓN PARA CUANDO?",
       "¡No te lo crees ni tú!, ¿pero la precisión te la sabes?!",
-      '"Los segundos son los primeros perdedores." -Rodri12721',
+      'Los segundos son los primeros perdedores.',
     ],
   };
 
