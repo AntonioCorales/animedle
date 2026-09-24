@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { SubtitleStyles, TitleStyles } from "../common";
+import Confetti from "../common/Confetti";
 import { SearchAnime } from "../game/context";
 import { useCounterContext } from "../game/counter-context";
 import { type Quiz, useAniQuizContext } from "./context";
-import ConfettiExplosion from "react-confetti";
 import styled from "styled-components";
 import { precisionToClass } from "../chara-anime/game";
 import useStorage from "../useStorage";
@@ -267,16 +267,7 @@ function End() {
 
   return (
     <div className="flex flex-col gap-4 flex-1 justify-center items-center pb-64">
-      {percent > 20 && (
-        <ConfettiExplosion
-          style={{
-            zIndex: 1000,
-            width: "90vw",
-            height: "100vh",
-            marginInline: "auto",
-          }}
-        />
-      )}
+      <Confetti active={percent > 20} />
       <span className={"text-2xl"}>¡Finalizado!</span>
 
       <span className={`text-lg leading-5 ${classPoints} relative leading-5`}>

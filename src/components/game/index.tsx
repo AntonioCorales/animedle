@@ -1,14 +1,12 @@
 "use client";
-import ConfettiExplosion from "react-confetti";
 import { useGameContext } from "./context";
 import SearchAnimeSelect from "./Search";
 import Table from "./Table";
-import { RestartAlt } from "@mui/icons-material";
-import { useEffect, useState } from "react";
+import { RestartAlt, Visibility } from "@mui/icons-material";
 import Swal from "sweetalert2";
 import { SubtitleStyles, TitleStyles } from "../common";
+import Confetti from "../common/Confetti";
 import { useCounterContext } from "./counter-context";
-import { AnimedleHints, DEFAULT_ANIMEDLE_HINTS, readAnimedleHints } from "../elements/Settings";
 
 export default function AnimeDleGame() {
   const { addAnime, setState, anime, state, selectedAnimesIds } = useGameContext();
@@ -46,6 +44,7 @@ export default function AnimeDleGame() {
             disabled={state === "win"}
             formatOptions={{tagsLimit: 4}}
             excludeAnimes={selectedAnimesIds}
+            frozen={state !== "stale"}
           />
           <Actions />
           <Status />
@@ -68,36 +67,36 @@ function Actions() {
     revealMainGenre,
     revealedMainTag,
     revealMainTag,
+    givenUp,
+    giveUp,
+    state,
   } = useGameContext();
   const { length } = selectedAnimes;
   const description = formatDescription(anime?.description);
-  const { reset } = useCounterContext();
-  const [hints, setHints] = useState<AnimedleHints>(DEFAULT_ANIMEDLE_HINTS);
-
-  useEffect(() => {
-    setHints(readAnimedleHints());
-    const onStorage = () => setHints(readAnimedleHints());
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const { reset, setState: setCounterState } = useCounterContext();
 
   const handleReset = () => {
     resetGame();
     reset();
   };
+
+  const handleGiveUp = () => {
+    giveUp();
+    setCounterState("pause");
+  };
   return (
     <div className="flex gap-4 justify-between">
       <div className="flex flex-col lg:flex-row lg:gap-4 lg:items-center flex-wrap">
-        {hints.showYears && length >= 4 && (
+        {length >= 4 && (
           <button
             className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
             onClick={revealYears}
             disabled={revealedYears}
           >
-            {revealedYears ? `Año: ${anime?.seasonYear ?? "?"}` : "Mostrar años"}
+            {revealedYears ? `Año: ${anime?.seasonYear ?? "?"}` : "Ver año"}
           </button>
         )}
-        {hints.showMainGenre && length >= 6 && (
+        {length >= 6 && (
           <button
             className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
             onClick={revealMainGenre}
@@ -105,10 +104,10 @@ function Actions() {
           >
             {revealedMainGenre
               ? `Género principal: ${anime?.genres[0] ?? "?"}`
-              : "Mostrar género principal"}
+              : "Ver género principal"}
           </button>
         )}
-        {hints.showMainTag && length >= 8 && (
+        {length >= 8 && (
           <button
             className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10 text-center disabled:hover:bg-slate-900 disabled:opacity-100"
             onClick={revealMainTag}
@@ -116,7 +115,7 @@ function Actions() {
           >
             {revealedMainTag
               ? `Etiqueta principal: ${anime?.tags[0] ?? "?"}`
-              : "Mostrar etiqueta principal"}
+              : "Ver etiqueta principal"}
           </button>
         )}
         {length >= 10 && description && (
@@ -139,7 +138,16 @@ function Actions() {
       <div className="flex gap-2 justify-center items-start">
         <button
           className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10"
+          onClick={handleGiveUp}
+          disabled={givenUp || state !== "play"}
+          title="Mostrar anime"
+        >
+          <Visibility />
+        </button>
+        <button
+          className="bg-slate-900 text-white hover:bg-slate-800 p-2 rounded-md z-10"
           onClick={handleReset}
+          title="Reiniciar"
         >
           <RestartAlt />
         </button>
@@ -155,17 +163,22 @@ function Actions() {
 }
 
 function Status() {
-  const { state, selectedAnimes } = useGameContext();
+  const { state, selectedAnimes, givenUp, anime } = useGameContext();
   const { counter } = useCounterContext();
   const { length } = selectedAnimes;
 
   const numCounter = Math.floor(counter);
   return (
-    <div className="flex flex-row gap-2 justify-between items-end">
+    <div className="flex flex-row gap-2 justify-between items-end flex-wrap">
       <div>Tiempo: {numCounter}s</div>
       {state === "win" && (
         <div className="text-green-500 p-2 rounded-md text-center font-bold">
           ¡VICTORIA!
+        </div>
+      )}
+      {givenUp && state !== "win" && (
+        <div className="text-red-400 p-2 rounded-md text-center font-bold">
+          El anime era: <span className="text-white">{anime?.name}</span>
         </div>
       )}
       <div className="text-green-400">{length} intento(s)</div>
@@ -174,36 +187,8 @@ function Status() {
 }
 
 export function WinComponent() {
-  const { state, selectedAnimes } = useGameContext();
-
-  const [height, setHeight] = useState(0);
-
-  const updateWindowSize = () => {
-    const totalHeight = Math.max(
-      document.documentElement.scrollHeight,
-      document.body.scrollHeight
-    );
-    setHeight(totalHeight);
-  };
-
-  useEffect(() => {
-    updateWindowSize();
-  }, [selectedAnimes]);
-
-  return (
-    <>
-      {state === "win" && (
-        <ConfettiExplosion
-          style={{
-            zIndex: 1000,
-            width: "90vw",
-            height: height + "px",
-            marginInline: "auto",
-          }}
-        />
-      )}
-    </>
-  );
+  const { state } = useGameContext();
+  return <Confetti active={state === "win"} />;
 }
 
 function formatDescription(description?: string | null) {

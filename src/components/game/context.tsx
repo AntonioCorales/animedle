@@ -54,6 +54,8 @@ type GameContextType = {
   revealMainGenre: () => void;
   revealedMainTag: boolean;
   revealMainTag: () => void;
+  givenUp: boolean;
+  giveUp: () => void;
 };
 
 const GameContext = createContext<GameContextType>({
@@ -70,6 +72,8 @@ const GameContext = createContext<GameContextType>({
   revealMainGenre: () => {},
   revealedMainTag: false,
   revealMainTag: () => {},
+  givenUp: false,
+  giveUp: () => {},
 });
 
 export function GameProvider({ children }: React.PropsWithChildren) {
@@ -85,6 +89,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
   const [revealedYears, setRevealedYears] = useState<boolean>(false);
   const [revealedMainGenre, setRevealedMainGenre] = useState<boolean>(false);
   const [revealedMainTag, setRevealedMainTag] = useState<boolean>(false);
+  const [givenUp, setGivenUp] = useState<boolean>(false);
 
   const addAnime = (anime: SearchAnime) => {
     setState("play");
@@ -95,6 +100,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
   };
 
   useEffect(() => {
+    if (state !== "stale") return;
     const animes = formatAnimes(data, {
       tagsLimit: 4,
       types: listNames,
@@ -102,7 +108,7 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     });
     setAnimes(animes);
     setAnime(getRandomByArray(animes));
-  }, [data, formats, listNames]);
+  }, [data, formats, listNames, state]);
 
   const resetGame = () => {
     setAnime(getRandomByArray(animes));
@@ -112,7 +118,8 @@ export function GameProvider({ children }: React.PropsWithChildren) {
     setRevealedMainGenre(false);
     setRevealedMainTag(false);
     setRevealedYears(false);
-  };  
+    setGivenUp(false);
+  };
 
 
   return (
@@ -132,6 +139,8 @@ export function GameProvider({ children }: React.PropsWithChildren) {
         revealMainGenre: () => setRevealedMainGenre(true),
         revealedMainTag,
         revealMainTag: () => setRevealedMainTag(true),
+        givenUp,
+        giveUp: () => setGivenUp(true),
       }}
     >
       {children}

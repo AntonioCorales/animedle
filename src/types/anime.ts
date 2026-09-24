@@ -152,3 +152,5 @@ export const ANIME_FORMATS: Format[] = [
 ];
 
 export const DEFAULT_ANIME_FORMATS: Format[] = ["TV", "MOVIE", "OVA", "ONA"];
+
+export const DEFAULT_LIST_NAMES: ListName[] = ["Completed"];

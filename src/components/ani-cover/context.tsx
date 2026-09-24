@@ -82,8 +82,17 @@ export function AniCoverProvider({ children }: React.PropsWithChildren) {
   }, [animes]);
 
   useEffect(() => {
+    if (
+      status === "playing" ||
+      status === "win" ||
+      status === "win-round" ||
+      status === "error-round" ||
+      status === "end"
+    )
+      return;
     initAniCover();
-  }, [initAniCover]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initAniCover, status]);
 
   return (
     <AniCoverContext.Provider

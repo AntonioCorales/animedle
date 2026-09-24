@@ -17,18 +17,36 @@ export type AnimedleHints = {
 
 export const ANIMEDLE_HINTS_KEY = "animedleHints";
 export const DEFAULT_ANIMEDLE_HINTS: AnimedleHints = {
-  showYears: true,
-  showMainGenre: true,
-  showMainTag: true,
+  showYears: false,
+  showMainGenre: false,
+  showMainTag: false,
 };
 
 export function readAnimedleHints(): AnimedleHints {
   try {
     const item = localStorage.getItem(ANIMEDLE_HINTS_KEY);
-    if (!item) return DEFAULT_ANIMEDLE_HINTS;
-    return { ...DEFAULT_ANIMEDLE_HINTS, ...JSON.parse(item) };
+    if (!item) {
+      localStorage.setItem(
+        ANIMEDLE_HINTS_KEY,
+        JSON.stringify(DEFAULT_ANIMEDLE_HINTS)
+      );
+      return { ...DEFAULT_ANIMEDLE_HINTS };
+    }
+    const parsed = JSON.parse(item);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      localStorage.setItem(
+        ANIMEDLE_HINTS_KEY,
+        JSON.stringify(DEFAULT_ANIMEDLE_HINTS)
+      );
+      return { ...DEFAULT_ANIMEDLE_HINTS };
+    }
+    return { ...DEFAULT_ANIMEDLE_HINTS, ...parsed };
   } catch {
-    return DEFAULT_ANIMEDLE_HINTS;
+    return { ...DEFAULT_ANIMEDLE_HINTS };
   }
 }
 

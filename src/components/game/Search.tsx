@@ -12,6 +12,7 @@ import {
   DEFAULT_ANIMEDLE_HINTS,
   readAnimedleHints,
 } from "../elements/Settings";
+import { Format, ListName } from "@/types/anime";
 
 export default function SearchAnimeSelect(props: SearchProps) {
   const {
@@ -20,11 +21,16 @@ export default function SearchAnimeSelect(props: SearchProps) {
     formatOptions,
     excludeAnimes = [],
     hideImage,
+    frozen = false,
   } = props;
   const { user, listNames, formats } = usePageContext();
   const { data, isLoading } = useGetAnimeByUser(user);
 
   const [animes, setAnimes] = useState<SearchAnime[]>([]);
+  const initialFiltersRef = useRef<{
+    types: ListName[];
+    formats: Format[];
+  } | null>(null);
 
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -65,13 +71,26 @@ export default function SearchAnimeSelect(props: SearchProps) {
   );
 
   useEffect(() => {
+    if (frozen) {
+      if (!initialFiltersRef.current) {
+        initialFiltersRef.current = { types: listNames, formats };
+        const animes = formatAnimes(data, {
+          ...formatOptions,
+          types: listNames,
+          formats,
+        });
+        setAnimes(animes);
+      }
+      return;
+    }
+    initialFiltersRef.current = null;
     const animes = formatAnimes(data, {
       ...formatOptions,
       types: listNames,
       formats,
     });
     setAnimes(animes);
-  }, [data, formatOptions, listNames, formats]);
+  }, [data, formatOptions, listNames, formats, frozen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -295,4 +314,5 @@ type SearchProps = {
   className?: string;
   excludeAnimes?: number[];
   hideImage?: boolean;
+  frozen?: boolean;
 };

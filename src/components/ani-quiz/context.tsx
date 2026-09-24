@@ -149,6 +149,7 @@ export const AniQuizProvider = ({
   const { quiz, isLoading, redo } = useInitQuiz({
     quizNumber: currentQuiz,
     numOptions,
+    active: status === "init" || status === "loading",
   });
 
   const nextQuiz = () => {
@@ -220,8 +221,12 @@ export const AniQuizProvider = ({
   );
 };
 
-function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
-  const { numOptions } = props;
+function useInitQuiz(props: {
+  quizNumber: number;
+  numOptions: number;
+  active: boolean;
+}) {
+  const { numOptions, active } = props;
   const { animes, isLoading } = usePageContext();
   const [quiz, setQuiz] = useState<Quiz>();
 
@@ -271,8 +276,9 @@ function useInitQuiz(props: { quizNumber: number; numOptions: number }) {
   }, [animes, isLoading, numOptions]);
 
   useEffect(() => {
+    if (!active) return;
     redo();
-  }, [redo]);
+  }, [redo, active]);
 
   return {
     quiz,

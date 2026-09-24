@@ -1,11 +1,11 @@
 "use client";
 import { useAniCoverContext } from "@/components/ani-cover/context";
 import { SubtitleStyles, TitleStyles } from "../common";
+import Confetti from "../common/Confetti";
 import SearchAnimeSelect from "../game/Search";
 import { CardAnimationPulseStyles } from "../chara-anime/game";
 import { SearchAnime } from "../game/context";
 import { RefreshOutlined } from "@mui/icons-material";
-import ConfettiExplosion from "react-confetti";
 import { PixelatedImage } from "./Pixeled";
 import useStorage from "../useStorage";
 
@@ -36,16 +36,7 @@ function GameBar() {
       >
         <RefreshOutlined />
       </button>
-      {status === "win" && (
-        <ConfettiExplosion
-          style={{
-            zIndex: 1000,
-            width: "90vw",
-            height: "100vh",
-            marginInline: "auto",
-          }}
-        />
-      )}
+      <Confetti active={status === "win"} />
     </div>
   );
 }
@@ -138,6 +129,13 @@ function Game() {
           disabled={status !== "playing"}
           hideImage
           excludeAnimes={selectedAnimes.map((anime) => anime.id)}
+          frozen={
+            status === "playing" ||
+            status === "win" ||
+            status === "win-round" ||
+            status === "error-round" ||
+            status === "end"
+          }
         />
         <div className="flex-col gap-2 hidden md:flex">
           {selectedAnimes.map((selectedAnime) => (
